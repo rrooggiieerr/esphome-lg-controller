@@ -5,7 +5,7 @@ from esphome.components import climate
 from .. import CONF_LG_CONTROLLER_ID, LGControllerComponent
 
 DEPENDENCIES = ["lg_controller"]
-CODEOWNERS = ["JanM321", "@rrooggiieerr"]
+CODEOWNERS = ["@JanM321", "@rrooggiieerr"]
 
 CONFIG_SCHEMA = cv.All(climate.CLIMATE_SCHEMA.extend(
     {

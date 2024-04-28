@@ -6,7 +6,7 @@ from esphome.const import CONF_ID
 from .. import lg_controller_ns, LG_DEVICE_SCHEMA, ENTITY_ID
 
 DEPENDENCIES = ["lg_controller"]
-CODEOWNERS = ["JanM321", "@rrooggiieerr"]
+CODEOWNERS = ["@JanM321", "@rrooggiieerr"]
 
 # Can we get these from lg_controller.h?
 LG_ENTITY_AIR_PURIFIER = "air_purifier"

@@ -4,7 +4,7 @@ from esphome.components import uart
 from esphome.const import CONF_ID, CONF_SENSOR
 
 DEPENDENCIES = ["uart"]
-CODEOWNERS = ["JanM321", "@rrooggiieerr"]
+CODEOWNERS = ["@JanM321", "@rrooggiieerr"]
 
 TEMPERATURE_SENSOR = 'temperature_sensor'
 SLAVE = 'slave'

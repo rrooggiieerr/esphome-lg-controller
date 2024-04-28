@@ -41,8 +41,11 @@ bool LGControllerComponent::parse_capability(LgCapability capability) {
 		case LgCapability::HAS_TWO_VANES:
 			return (this->nvs_storage_.capabilities_message[5] & 0x80) != 0;
 		case LgCapability::HAS_FOUR_VANES:
-			// actual flag is unknown, assume 4 vanes if neither 1 nor 2 vanes are supported
-			return (this->nvs_storage_.capabilities_message[5] & 0x40) == 0 && (this->nvs_storage_.capabilities_message[5] & 0x80) == 0;
+			// Actual flag is unknown, assume 4 vanes if neither 1 nor 2 vanes are supported
+			// and the vane control bit is set.
+			return (this->nvs_storage_.capabilities_message[5] & 0x40) == 0 &&
+				(this->nvs_storage_.capabilities_message[5] & 0x80) == 0 &&
+				(this->nvs_storage_.capabilities_message[4] & 0x01) != 0;
 		case LgCapability::VERTICAL_SWING:
 			return (this->nvs_storage_.capabilities_message[1] & 0x80) != 0;
 		case LgCapability::HORIZONTAL_SWING:

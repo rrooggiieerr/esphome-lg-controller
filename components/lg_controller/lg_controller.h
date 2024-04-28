@@ -13,8 +13,8 @@
 namespace esphome {
 namespace lg_controller {
 
-#define MIN_TEMP_SETPOINT 16
-#define MAX_TEMP_SETPOINT 30
+static constexpr size_t MIN_TEMP_SETPOINT = 16;
+static constexpr size_t MAX_TEMP_SETPOINT = 30;
 
 #define LG_ENTITY_DEFROST "defrost"
 #define LG_ENTITY_PREHEAT "preheat"
@@ -38,7 +38,7 @@ namespace lg_controller {
 
 class LGEntity;
 
-enum LgCapability {
+enum class LgCapability {
 	PURIFIER,
 	FAN_AUTO,
 	FAN_SLOW,

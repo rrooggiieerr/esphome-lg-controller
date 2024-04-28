@@ -12,44 +12,44 @@ constexpr int8_t TempConversion::LGCelToCelAdjustment[];
 
 bool LGControllerComponent::parse_capability(LgCapability capability) {
 	switch (capability) {
-		case PURIFIER:
+		case LgCapability::PURIFIER:
 			return (this->nvs_storage_.capabilities_message[2] & 0x02) != 0;
-		case FAN_AUTO:
+		case LgCapability::FAN_AUTO:
 			return (this->nvs_storage_.capabilities_message[3] & 0x01) != 0;
-		case FAN_SLOW:
+		case LgCapability::FAN_SLOW:
 			return (this->nvs_storage_.capabilities_message[3] & 0x20) != 0;
-		case FAN_LOW:
+		case LgCapability::FAN_LOW:
 			return (this->nvs_storage_.capabilities_message[3] & 0x10) != 0;
-		case FAN_LOW_MEDIUM:
+		case LgCapability::FAN_LOW_MEDIUM:
 			return (this->nvs_storage_.capabilities_message[6] & 0x08) != 0;
-		case FAN_MEDIUM:
+		case LgCapability::FAN_MEDIUM:
 			return (this->nvs_storage_.capabilities_message[3] & 0x08) != 0;
-		case FAN_MEDIUM_HIGH:
+		case LgCapability::FAN_MEDIUM_HIGH:
 			return (this->nvs_storage_.capabilities_message[6] & 0x10) != 0;
-		case FAN_HIGH:
+		case LgCapability::FAN_HIGH:
 			return true;
-		case MODE_HEATING:
+		case LgCapability::MODE_HEATING:
 			return (this->nvs_storage_.capabilities_message[2] & 0x40) != 0;
-		case MODE_FAN:
+		case LgCapability::MODE_FAN:
 			return (this->nvs_storage_.capabilities_message[2] & 0x80) != 0;
-		case MODE_AUTO:
+		case LgCapability::MODE_AUTO:
 			return (this->nvs_storage_.capabilities_message[2] & 0x08) != 0;
-		case MODE_DEHUMIDIFY:
+		case LgCapability::MODE_DEHUMIDIFY:
 			return (this->nvs_storage_.capabilities_message[2] & 0x80) != 0;
-		case HAS_ONE_VANE:
+		case LgCapability::HAS_ONE_VANE:
 			return (this->nvs_storage_.capabilities_message[5] & 0x40) != 0;
-		case HAS_TWO_VANES:
+		case LgCapability::HAS_TWO_VANES:
 			return (this->nvs_storage_.capabilities_message[5] & 0x80) != 0;
-		case HAS_FOUR_VANES:
+		case LgCapability::HAS_FOUR_VANES:
 			// actual flag is unknown, assume 4 vanes if neither 1 nor 2 vanes are supported
 			return (this->nvs_storage_.capabilities_message[5] & 0x40) == 0 && (this->nvs_storage_.capabilities_message[5] & 0x80) == 0;
-		case VERTICAL_SWING:
+		case LgCapability::VERTICAL_SWING:
 			return (this->nvs_storage_.capabilities_message[1] & 0x80) != 0;
-		case HORIZONTAL_SWING:
+		case LgCapability::HORIZONTAL_SWING:
 			return (this->nvs_storage_.capabilities_message[1] & 0x40) != 0;
-		case HAS_ESP_VALUE_SETTING:
+		case LgCapability::HAS_ESP_VALUE_SETTING:
 			return (this->nvs_storage_.capabilities_message[4] & 0x02) != 0;
-		case OVERHEATING_SETTING:
+		case LgCapability::OVERHEATING_SETTING:
 			return (this->nvs_storage_.capabilities_message[7] & 0x80) != 0;
 		default:
 			return false;
@@ -128,14 +128,12 @@ void LGControllerComponent::configure_capabilities() {
 		if (this->parse_capability(LgCapability::HAS_ONE_VANE)) {
 			if(this->vane_select_1_ != nullptr)
 				this->vane_select_1_->set_internal(false);
-		}
-		else if (this->parse_capability(LgCapability::HAS_TWO_VANES)) {
+		} else if (this->parse_capability(LgCapability::HAS_TWO_VANES)) {
 			if(this->vane_select_1_ != nullptr)
 				this->vane_select_1_->set_internal(false);
 			if(this->vane_select_2_ != nullptr)
 				this->vane_select_2_->set_internal(false);
-		}
-		else if (this->parse_capability(LgCapability::HAS_FOUR_VANES)) {
+		} else if (this->parse_capability(LgCapability::HAS_FOUR_VANES)) {
 			if(this->vane_select_1_ != nullptr)
 				this->vane_select_1_->set_internal(false);
 			if(this->vane_select_2_ != nullptr)

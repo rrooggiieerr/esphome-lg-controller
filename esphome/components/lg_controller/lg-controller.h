@@ -130,11 +130,12 @@ constexpr int8_t TempConversion::LGCelToCelAdjustment[];
 
 class LgController final : public climate::Climate, public uart::UARTDevice, public Component {
     static constexpr size_t MsgLen = 13;
-    static constexpr int RxPin = 26; // Keep in sync with rx_pin in base.yaml.
 
     climate::ClimateTraits supported_traits_{};
 
+    InternalGPIOPin& rx_pin_;
     esphome::sensor::Sensor& temperature_sensor_;
+
     LgSelect& vane_select_1_;
     LgSelect& vane_select_2_;
     LgSelect& vane_select_3_;
@@ -155,10 +156,12 @@ class LgController final : public climate::Climate, public uart::UARTDevice, pub
     esphome::binary_sensor::BinarySensor& defrost_;
     esphome::binary_sensor::BinarySensor& preheat_;
     esphome::binary_sensor::BinarySensor& outdoor_;
+    esphome::binary_sensor::BinarySensor& auto_dry_active_;
     uint32_t last_outdoor_change_millis_ = 0;
 
     LgSwitch& purifier_;
     LgSwitch& internal_thermistor_;
+    LgSwitch& auto_dry_;
 
     uint8_t recv_buf_[MsgLen] = {};
     uint32_t recv_buf_len_ = 0;
@@ -227,6 +230,7 @@ class LgController final : public climate::Climate, public uart::UARTDevice, pub
         HORIZONTAL_SWING,
         HAS_ESP_VALUE_SETTING,
         OVERHEATING_SETTING,
+        AUTO_DRY,
     };
 
     bool parse_capability(LgCapability capability) {
@@ -273,6 +277,8 @@ class LgController final : public climate::Climate, public uart::UARTDevice, pub
                 return (nvs_storage_.capabilities_message[4] & 0x02) != 0;
             case LgCapability::OVERHEATING_SETTING:
                 return (nvs_storage_.capabilities_message[7] & 0x80) != 0;
+            case LgCapability::AUTO_DRY:
+                return (nvs_storage_.capabilities_message[4] & 0x80) != 0;
         }
         return false;
     }
@@ -390,6 +396,8 @@ class LgController final : public climate::Climate, public uart::UARTDevice, pub
                 }
             }
             purifier_.set_internal(!parse_capability(LgCapability::PURIFIER));
+            auto_dry_.set_internal(!parse_capability(LgCapability::AUTO_DRY));
+            auto_dry_active_.set_internal(!parse_capability(LgCapability::AUTO_DRY));
         }
 
         internal_thermistor_.set_internal(slave_);
@@ -397,7 +405,8 @@ class LgController final : public climate::Climate, public uart::UARTDevice, pub
     }
 
 public:
-    LgController(sensor::Sensor* temperature_sensor,
+    LgController(InternalGPIOPin* rx_pin,
+                 sensor::Sensor* temperature_sensor,
                  LgSelect* vane_select_1,
                  LgSelect* vane_select_2,
                  LgSelect* vane_select_3,
@@ -415,10 +424,13 @@ public:
                  binary_sensor::BinarySensor* defrost,
                  binary_sensor::BinarySensor* preheat,
                  binary_sensor::BinarySensor* outdoor,
+                 binary_sensor::BinarySensor* auto_dry_active,
                  LgSwitch* purifier,
                  LgSwitch* internal_thermistor,
+                 LgSwitch* auto_dry,
                  bool fahrenheit, bool is_slave_controller)
-      : temperature_sensor_(*temperature_sensor),
+      : rx_pin_(*rx_pin),
+        temperature_sensor_(*temperature_sensor),
         vane_select_1_(*vane_select_1),
         vane_select_2_(*vane_select_2),
         vane_select_3_(*vane_select_3),
@@ -436,8 +448,10 @@ public:
         defrost_(*defrost),
         preheat_(*preheat),
         outdoor_(*outdoor),
+        auto_dry_active_(*auto_dry_active),
         purifier_(*purifier),
         internal_thermistor_(*internal_thermistor),
+        auto_dry_(*auto_dry),
         fahrenheit_(fahrenheit),
         slave_(is_slave_controller)
     {
@@ -473,8 +487,15 @@ public:
             set_sleep_timer(v);
         });
 
-        purifier_.add_on_state_callback([this](bool) { set_changed(); });
-        internal_thermistor_.add_on_state_callback([this](bool) { set_changed(); });
+        purifier_.add_on_state_callback([this](bool) {
+            pending_status_change_ = true;
+        });
+        internal_thermistor_.add_on_state_callback([this](bool) {
+            pending_status_change_ = true;
+        });
+        auto_dry_.add_on_state_callback([this](bool) {
+            pending_type_a_settings_change_ = true;
+        });
     }
 
     float get_setup_priority() const override {
@@ -508,7 +529,7 @@ public:
             uint8_t b;
             UARTDevice::read_byte(&b);
         }
-        set_changed();
+        pending_status_change_ = true;
 
         // Call `update` every 6 seconds, but first wait 10 seconds.
         set_timeout("initial_send", 10000, [this]() {
@@ -530,7 +551,7 @@ public:
         if (call.get_swing_mode().has_value()) {
             set_swing_mode(*call.get_swing_mode());
         }
-        this->set_changed();
+        this->pending_status_change_ = true;
         this->publish_state();
     }
 
@@ -539,10 +560,6 @@ public:
     }
 
 private:
-    void set_changed() {
-        pending_status_change_ = true;
-    }
-
     // Sets position of vane index (1-4) to position (0-6).
     void set_vane_position(int index, int position) {
         if (index < 1 || index > 4) {
@@ -616,13 +633,20 @@ private:
             ESP_LOGE(TAG, "Ignoring sleep timer for slave controller");
             return;
         }
-        set_sleep_timer_internal(uint32_t(minutes));
-        set_changed();
+        ESP_LOGD(TAG, "Setting sleep timer: %d minutes", minutes);
+        if (minutes > 0) {
+            sleep_timer_target_millis_ = millis() + unsigned(minutes) * 60 * 1000;
+            active_reservation_ = true;
+        } else {
+            sleep_timer_target_millis_.reset();
+            active_reservation_ = false;
+        }
+        pending_status_change_ = true;
     }
 
     optional<float> get_room_temp() const {
         float temp = temperature_sensor_.get_state();
-        if (isnan(temp) || temp == 0) {
+        if (std::isnan(temp) || temp == 0) {
             return {};
         }
         if (fahrenheit_) {
@@ -666,17 +690,6 @@ private:
             }
         }
         this->swing_mode = mode;
-    }
-
-    void set_sleep_timer_internal(uint32_t minutes) {
-        ESP_LOGD(TAG, "Setting sleep timer: %u minutes", minutes);
-        if (minutes > 0) {
-            sleep_timer_target_millis_ = millis() + minutes * 60 * 1000;
-            active_reservation_ = true;
-        } else {
-            sleep_timer_target_millis_.reset();
-            active_reservation_ = false;
-        }
     }
 
     void send_status_message() {
@@ -877,6 +890,12 @@ private:
         send_buf_[8] = (send_buf_[8] & 0xf0) | (vane_position_[2] & 0x0f); // Set vane 3
         send_buf_[8] = (send_buf_[8] & 0x0f) | ((vane_position_[3] & 0x0f) << 4); // Set vane 4
 
+        // Set auto dry setting.
+        uint8_t b = send_buf_[11] & ~0x8;
+        if (auto_dry_.state) {
+            b |= 0x8;
+        }
+        send_buf_[11] = b;
 
         send_buf_[12] = calc_checksum(send_buf_);
 
@@ -1023,6 +1042,12 @@ private:
         }
         if (outdoor_changed) {
             last_outdoor_change_millis_ = millis();
+        }
+
+        if (sender == MessageSender::Unit && !auto_dry_.is_internal()) {
+            bool unit_off = (buffer[1] & 0x2) == 0;
+            bool drying = (buffer[10] & 0x10) && unit_off;
+            auto_dry_active_.publish_state(drying);
         }
 
         bool read_temp = false;
@@ -1174,7 +1199,7 @@ private:
                 pref.save(&nvs_storage_);
                 global_preferences->sync();
                 ESP_LOGD(TAG, "restarting to apply initial capabilities");
-                ESP.restart();
+                App.safe_reboot();
             }
             else {
                 ESP_LOGD(TAG, "updated device capabilities, manual restart required to take effect");
@@ -1229,6 +1254,8 @@ private:
         } else {
             ESP_LOGE(TAG, "Unexpected vane 4 position: %u", vane4);
         }
+
+        auto_dry_.publish_state(buffer[11] & 0x8);
 
         if (sender != MessageSender::Slave) {
             // Handle fan speed 0 (slow) change
@@ -1388,7 +1415,7 @@ private:
                 sleep_timer_.publish_state(0);
                 ignore_sleep_timer_callback_ = false;
                 this->mode = climate::CLIMATE_MODE_OFF;
-                set_changed();
+                pending_status_change_ = true;
                 publish_state();
             } else if (optional<uint32_t> minutes = get_sleep_timer_minutes()) {
                 if (sleep_timer_.state != *minutes) {
@@ -1409,7 +1436,7 @@ private:
         // approximately the same time and the message will hopefully be corrupt (and ignored)
         // anyway. Else the pending_send_/send_buf_ mechanism should catch it and we try again.
         //
-        // Note: using digitalRead is *much* better for this than using UARTDevice because that
+        // Note: using digital_read is *much* better for this than using UARTDevice because that
         // interface has significant delays. It has to wait for a full byte to arrive and this
         // takes about 9-10 ms with our slow baud rate. There are also various buffers and
         // timeouts before incoming bytes reach us.
@@ -1419,7 +1446,7 @@ private:
         // collisions.
         auto check_can_send = [&]() -> bool {
             while (true) {
-                if (UARTDevice::available() > 0 || digitalRead(RxPin) == LOW) {
+                if (UARTDevice::available() > 0 || !rx_pin_.digital_read()) {
                     ESP_LOGD(TAG, "line busy, not sending yet");
                     return false;
                 }
@@ -1442,17 +1469,27 @@ private:
             }
             return;
         }
+        // Send a status message if there is a pending change.
+        // Additionally, queue a Type A message after sending the status message because some
+        // units set the vane position to the default setting after changing swing mode or
+        // operation mode.
+        if (pending_status_change_) {
+            if (check_can_send()) {
+                send_status_message();
+                pending_type_a_settings_change_ = true;
+            }
+            return;
+        }
         // Send an AB message every 10 minutes to request pipe temperature values.
-        if (!slave_ && (millis_now - last_sent_recv_type_b_millis_) > 10 * 60 * 1000) {
+        if (!slave_ && millis_now - last_sent_recv_type_b_millis_ > 10 * 60 * 1000) {
             if (check_can_send()) {
                 send_type_b_settings_message(/* timed = */ true);
             }
             return;
         }
-        // Send a status message every 20 seconds, or now if we have a pending change.
+        // Send a status message every 20 seconds.
         // Slave controllers only send this if needed.
-        if (pending_status_change_ ||
-            (!slave_ && millis_now - last_sent_status_millis_ > 20 * 1000)) {
+        if (!slave_ && millis_now - last_sent_status_millis_ > 20 * 1000) {
             if (check_can_send()) {
                 send_status_message();
             }

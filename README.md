@@ -13,21 +13,9 @@ This has some advantages compared to the [LG ThinQ integration](https://github.c
 
 # Compatibility
 ### Supported AC units
-This ESPHome controller has been used with the following units:
-* LG PC12SQ (Standard Plus), AP09RT units connected to a multi-split outdoor unit (heat pump, MU2R17 Multi F).
-* LG AS-W123MMM9 single wall mounted unit from 2013, heat pump, replaces PREMTB10U controller ([source](https://github.com/JanM321/esphome-lg-controller/issues/1#issuecomment-1631718974)).
-* LG Artcool Gallery and 4 Way Cassette connected to LG MU3R19 Multi F ([source](https://github.com/JanM321/esphome-lg-controller/issues/11)).
-* LG S12ET indoor unit ([source](https://github.com/JanM321/esphome-lg-controller/issues/3#issuecomment-1761040745)).
-* LG ARNU18GSCR4 and LG ARNU36GSVA4 Multi V indoor units ([source](https://github.com/JanM321/esphome-lg-controller/issues/8#issuecomment-1817444454)).
-* LG TC07GQR and LG PC12SQ units ([source](https://github.com/JanM321/esphome-lg-controller/issues/25#issuecomment-1911668782)).
-* LG B55AWYU3G5 indoor unit and LG ABUW55G7SB0 outdoor unit, 17.1 kW Ducted ([source](https://github.com/JanM321/esphome-lg-controller/issues/30)).
-* LG LMN079HVT and LG LSN090HSV5 indoor units with LG LMU361HHV outdoor unit ([source](https://github.com/JanM321/esphome-lg-controller/issues/36)).
-* LG DC18RQ.NSK Deluxe unit ([source](https://github.com/JanM321/esphome-lg-controller/issues/41#issuecomment-2009415493)).
-* LG S09EQ.NSJ indoor unit with LG S09EQ.UA3 outdoor unit ([source](https://github.com/JanM321/esphome-lg-controller/discussions/42)).
-* LG MT09R NU1 indoor ceiling cassette with LG MU4R25 U21 outdoor unit ([source](https://github.com/JanM321/esphome-lg-controller/discussions/47)).
-* LG S09ET.NSK and LG S12ET.NSK indoor units ([source](https://github.com/JanM321/esphome-lg-controller/discussions/50) and [pictures](https://github.com/JanM321/esphome-lg-controller/discussions/51)).
+If your indoor unit supports the LG PREMTB100 and/or LG PREMTA200 controller, it will very likely be compatible.
 
-If your indoor unit supports the LG PREMTB100 and/or LG PREMTA200 controller, it will very likely be compatible. Please [let us know](https://github.com/JanM321/esphome-lg-controller/discussions) if it works so we can add it to this list :)
+The [wiki](https://github.com/JanM321/esphome-lg-controller/wiki) has a list of LG AC units that have been tested with this controller.
 
 ### Multiple controllers
 It's possible to connect multiple controllers to a single indoor unit, but one of them must be set as 'master' and the others as 'slave'. Since February 2024, this ESPHome controller has experimental support for this. I'm not using this myself, so there might be some issues with this (please report them).
@@ -52,16 +40,17 @@ Features currently available in Home Assistant:
 * Operation mode (off, auto, cool, heat, dry/dehumidify, fan only).
 * Target temperature (0.5°C steps).
 * Use of a Home Assistant temperature sensor for room temperature (rounded to nearest 0.5°C). 
-* Fan mode (slow, low, medium, high, auto).
+* Fan speed (slow, low, medium, high, auto).
 * Swing mode (off, vertical, horizontal, both).
 * Airflow up/down setting from 0-6 for up to 4 vanes (vane angle, with 0 being default for operation mode).
 * Switch for external vs internal thermistor.
 * Switch for air purifier (plasma) on/off.
+* Switch and binary sensor for Auto Dry (also known as Auto Clean) feature. Used to dry indoor unit when it's turned off after cooling/dehumidifying.
 * Sensors for reporting outdoor unit on/off, defrost, preheat, error code.
 * Sensors for reporting in/mid/out pipe temperatures (if supported by unit).
 * Input field for sleep timer from 0 to 420 minutes (0 turns off the sleep timer).
-* Input fields for installer fan speed setting (to fine-tune fan speeds, 0-255 with 0 being factory default).
-* Select option for installer setting 15 from 0-4 (to change over heating behavior in heating mode).
+* Input fields for fan speed installer setting (to fine-tune fan speeds, 0-255 with 0 being factory default). This is installer setting 3 (ESP Setting) on LG controllers.
+* Select option for over heating installer setting from 0-4 (to change over heating behavior in heating mode). This is installer setting 15 (Over Heating) on LG controllers.
 * YAML options for Fahrenheit mode and 'slave' controller mode.
 * Detects & exposes only supported capabilities for the connected indoor unit.
 

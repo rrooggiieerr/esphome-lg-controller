@@ -6,11 +6,21 @@ esp32:
   board: esp32dev
   framework:
     type: arduino
+    #type: esp-idf
+
+#esp32_ble_tracker:
+#  scan_parameters:
+#    active: false
+
+#bluetooth_proxy:
+#  active: false
 
 uart:
   - id: ac_serial
     tx_pin: GPIO25
-    rx_pin: GPIO26 # Keep in sync with RxPin in lg-controller.h
+    rx_pin:
+      number: GPIO26 # Keep in sync with rx_pin below.
+      allow_other_uses: true
     baud_rate: 104
 
 sensor:
@@ -29,6 +39,10 @@ climate:
   - platform: lg_controller
     name: ""
     id: ${deviceid}
+    uart_id: ac_serial
+    rx_pin:
+      number: GPIO26 # Keep in sync with rx_pin above.
+      allow_other_uses: true
     fahrenheit: ${fahrenheit}
     is_slave_controller: ${is_slave_controller}
     temperature_sensor: temp_sensor
@@ -108,6 +122,10 @@ climate:
       name: Outdoor Unit
       id: outdoor
       icon: mdi:fan
+    auto_dry_active:
+      name: Auto Dry Active
+      id: auto_dry_active
+      icon: mdi:fan-clock
     purifier:
       name: Air Purifier
       id: air_purifier
@@ -116,3 +134,7 @@ climate:
       name: Internal Thermistor
       id: internal_thermistor
       icon: mdi:thermometer
+    auto_dry:
+      name: Auto Dry
+      id: auto_dry
+      icon: mdi:fan-clock

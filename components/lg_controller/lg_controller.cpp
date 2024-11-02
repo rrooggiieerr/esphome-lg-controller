@@ -54,11 +54,10 @@ bool LGControllerComponent::parse_capability(LgCapability capability) {
 			return (this->nvs_storage_.capabilities_message[4] & 0x02) != 0;
 		case LgCapability::OVERHEATING_SETTING:
 			return (this->nvs_storage_.capabilities_message[7] & 0x80) != 0;
-        case LgCapability::AUTO_DRY:
-            return (this->nvs_storage_.capabilities_message[4] & 0x80) != 0;
-		default:
-			return false;
+		case LgCapability::AUTO_DRY:
+			return (this->nvs_storage_.capabilities_message[4] & 0x80) != 0;
 	}
+	return false;
 }
 
 void LGControllerComponent::configure_capabilities() {

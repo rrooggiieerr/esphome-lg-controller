@@ -130,58 +130,39 @@ void LGControllerComponent::configure_capabilities() {
 			swing_modes.insert(climate::CLIMATE_SWING_HORIZONTAL);
 		this->supported_traits_.set_supported_swing_modes(swing_modes);
 
-		if (this->parse_capability(LgCapability::HAS_ONE_VANE)) {
-			if(this->vane_select_1_ != nullptr)
-				this->vane_select_1_->set_internal(false);
-		} else if (this->parse_capability(LgCapability::HAS_TWO_VANES)) {
-			if(this->vane_select_1_ != nullptr)
-				this->vane_select_1_->set_internal(false);
-			if(this->vane_select_2_ != nullptr)
-				this->vane_select_2_->set_internal(false);
-		} else if (this->parse_capability(LgCapability::HAS_FOUR_VANES)) {
-			if(this->vane_select_1_ != nullptr)
-				this->vane_select_1_->set_internal(false);
-			if(this->vane_select_2_ != nullptr)
-				this->vane_select_2_->set_internal(false);
-			if(this->vane_select_3_ != nullptr)
-				this->vane_select_3_->set_internal(false);
-			if(this->vane_select_4_ != nullptr)
-				this->vane_select_4_->set_internal(false);
-		}
+		// Disable unsupported entities
+		if (this->vane_select_1_ != nullptr && !this->parse_capability(LgCapability::HAS_ONE_VANE))
+			this->vane_select_1_->set_internal(true);
+		if (this->vane_select_2_ != nullptr && !this->parse_capability(LgCapability::HAS_TWO_VANES))
+			this->vane_select_2_->set_internal(true);
+		if (this->vane_select_3_ != nullptr && !this->parse_capability(LgCapability::HAS_FOUR_VANES))
+			this->vane_select_3_->set_internal(true);
+		if (this->vane_select_4_ != nullptr && !this->parse_capability(LgCapability::HAS_FOUR_VANES))
+			this->vane_select_4_->set_internal(true);
 
-		if (!this->slave_) {
-			if (this->parse_capability(LgCapability::HAS_ESP_VALUE_SETTING)) {
-				if (this->fan_speed_slow_ != nullptr && this->parse_capability(LgCapability::FAN_SLOW)) {
-					this->fan_speed_slow_->set_internal(false);
-				}
-				if (this->fan_speed_low_ != nullptr && this->parse_capability(LgCapability::FAN_LOW)) {
-					this->fan_speed_low_->set_internal(false);
-				}
-				if (this->fan_speed_medium_ != nullptr && this->parse_capability(LgCapability::FAN_MEDIUM)) {
-					this->fan_speed_medium_->set_internal(false);
-				}
-				if (this->fan_speed_high_ != nullptr && this->parse_capability(LgCapability::FAN_HIGH)) {
-					this->fan_speed_high_->set_internal(false);
-				}
-			}
-			if (this->overheating_select_ != nullptr && this->parse_capability(LgCapability::OVERHEATING_SETTING)) {
-				this->overheating_select_->set_internal(false);
-			}
-		}
+		if (this->fan_speed_slow_ != nullptr && (this->slave_ || !this->parse_capability(LgCapability::HAS_ESP_VALUE_SETTING) || !this->parse_capability(LgCapability::FAN_SLOW)))
+			this->fan_speed_slow_->set_internal(true);
+		if (this->fan_speed_low_ != nullptr && (this->slave_ || !this->parse_capability(LgCapability::HAS_ESP_VALUE_SETTING) || !this->parse_capability(LgCapability::FAN_LOW)))
+			this->fan_speed_low_->set_internal(true);
+		if (this->fan_speed_medium_ != nullptr && (this->slave_ || !this->parse_capability(LgCapability::HAS_ESP_VALUE_SETTING) || !this->parse_capability(LgCapability::FAN_MEDIUM)))
+			this->fan_speed_medium_->set_internal(true);
+		if (this->fan_speed_high_ != nullptr && (this->slave_ || !this->parse_capability(LgCapability::HAS_ESP_VALUE_SETTING) || !this->parse_capability(LgCapability::FAN_HIGH)))
+			this->fan_speed_high_->set_internal(true);
+		if (this->overheating_select_ != nullptr && (this->slave_ || !this->parse_capability(LgCapability::OVERHEATING_SETTING)))
+			this->overheating_select_->set_internal(true);
 
-		if (this->purifier_entity_ != nullptr)
-			this->purifier_entity_->set_internal(!this->parse_capability(LgCapability::PURIFIER));
-		if (this->auto_dry_entity_ != nullptr)
-			this->auto_dry_entity_->set_internal(!this->parse_capability(LgCapability::AUTO_DRY));
-		if (this->auto_dry_active_entity_ != nullptr)
-			this->auto_dry_active_entity_->set_internal(!this->parse_capability(LgCapability::AUTO_DRY));
+		if (this->purifier_entity_ != nullptr && !this->parse_capability(LgCapability::PURIFIER))
+			this->purifier_entity_->set_internal(true);
+		if (this->auto_dry_entity_ != nullptr && !this->parse_capability(LgCapability::AUTO_DRY))
+			this->auto_dry_entity_->set_internal(true);
+		if (this->auto_dry_active_entity_ != nullptr && !this->parse_capability(LgCapability::AUTO_DRY))
+			this->auto_dry_active_entity_->set_internal(true);
 	}
 
-	this->internal_thermistor_ = this->slave_;
-	if(this->internal_thermistor_entity_ != nullptr)
-		this->internal_thermistor_entity_->set_internal(this->internal_thermistor_);
-	if(this->sleep_timer_ != nullptr)
-		this->sleep_timer_->set_internal(this->slave_);
+	if(this->internal_thermistor_entity_ != nullptr && this->slave_)
+		this->internal_thermistor_entity_->set_internal(true);
+	if(this->sleep_timer_ != nullptr && this->slave_)
+		this->sleep_timer_->set_internal(true);
 }
 
 void LGControllerComponent::setup() {

@@ -174,6 +174,8 @@ void LGControllerComponent::configure_capabilities() {
 	}
 
 	this->internal_thermistor_ = this->slave_;
+	if(this->internal_thermistor_entity_ != nullptr)
+		this->internal_thermistor_entity_->set_internal(this->internal_thermistor_);
 	if(this->sleep_timer_ != nullptr)
 		this->sleep_timer_->set_internal(this->slave_);
 }

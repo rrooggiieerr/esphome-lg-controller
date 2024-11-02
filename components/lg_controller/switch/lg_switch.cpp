@@ -37,6 +37,10 @@ void LGSwitch::set_entity_id(std::string entity_id) {
 		this->set_icon("mdi:thermometer");
 		this->restore_and_set_mode(switch_::SWITCH_RESTORE_DEFAULT_OFF);
 	}
+	else if(entity_id == LG_ENTITY_AUTO_DRY) {
+		this->set_icon("mdi:fan-clock");
+//		this->restore_and_set_mode(switch_::SWITCH_RESTORE_DEFAULT_OFF);
+	}
 
 	this->parent_->add_entity(entity_id, this);
 }
@@ -46,6 +50,8 @@ void LGSwitch::set_state(bool state) {
 	}
 	else if(this->entity_id_ == LG_ENTITY_INTERNAL_THERMISTOR) {
 //		this->parent_->set_
+	}
+	else if(this->entity_id_ == LG_ENTITY_AUTO_DRY) {
 	}
 }
 

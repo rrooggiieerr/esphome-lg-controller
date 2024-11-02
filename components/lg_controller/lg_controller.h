@@ -19,6 +19,7 @@ static constexpr size_t MAX_TEMP_SETPOINT = 30;
 #define LG_ENTITY_DEFROST "defrost"
 #define LG_ENTITY_PREHEAT "preheat"
 #define LG_ENTITY_OUTDOOR "outdoor"
+#define LG_ENTITY_AUTO_DRY_ACTIVE "auto_dry_active"
 #define LG_ENTITY_FAN_SPEED_SLOW "fan_speed_slow"
 #define LG_ENTITY_FAN_SPEED_LOW "fan_speed_low"
 #define LG_ENTITY_FAN_SPEED_MEDIUM "fan_speed_medium"
@@ -35,6 +36,7 @@ static constexpr size_t MAX_TEMP_SETPOINT = 30;
 #define LG_ENTITY_PIPE_TEMPERATURE_OUT "pipe_temperature_out"
 #define LG_ENTITY_AIR_PURIFIER "air_purifier"
 #define LG_ENTITY_INTERNAL_THERMISTOR "internal_thermistor"
+#define LG_ENTITY_AUTO_DRY "auto_dry"
 
 class LGEntity;
 
@@ -58,6 +60,7 @@ enum class LgCapability {
 	HORIZONTAL_SWING,
 	HAS_ESP_VALUE_SETTING,
 	OVERHEATING_SETTING,
+	AUTO_DRY,
 };
 
 class LGControllerComponent: public esphome::Component,
@@ -138,12 +141,15 @@ protected:
 	binary_sensor::BinarySensor *preheat_entity_;
 	bool outdoor_;
 	binary_sensor::BinarySensor *outdoor_entity_;
+	binary_sensor::BinarySensor *auto_dry_active_entity_;
 	uint32_t last_outdoor_change_millis_ = 0;
 
 	bool purifier_ = false;
 	switch_::Switch *purifier_entity_;
 	bool internal_thermistor_ = true;
 	switch_::Switch *internal_thermistor_entity_;
+	bool auto_dry_ = true;
+	switch_::Switch *auto_dry_entity_;
 
 	uint8_t recv_buf_[MsgLen] = { };
 	uint32_t recv_buf_len_ = 0;

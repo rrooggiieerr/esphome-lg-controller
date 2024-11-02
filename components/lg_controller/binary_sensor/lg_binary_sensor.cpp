@@ -15,6 +15,8 @@ void LGBinarySensor::set_entity_id(std::string entity_id) {
 		this->set_icon("mdi:heat-wave");
 	} else if(entity_id == LG_ENTITY_OUTDOOR) {
 		this->set_icon("mdi:fan");
+	} else if(entity_id == LG_ENTITY_AUTO_DRY_ACTIVE) {
+		this->set_icon("mdi:fan-clock");
 	}
 
 	this->parent_->add_entity(entity_id, this);

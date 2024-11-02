@@ -54,6 +54,8 @@ bool LGControllerComponent::parse_capability(LgCapability capability) {
 			return (this->nvs_storage_.capabilities_message[4] & 0x02) != 0;
 		case LgCapability::OVERHEATING_SETTING:
 			return (this->nvs_storage_.capabilities_message[7] & 0x80) != 0;
+        case LgCapability::AUTO_DRY:
+            return (this->nvs_storage_.capabilities_message[4] & 0x80) != 0;
 		default:
 			return false;
 	}
@@ -166,6 +168,9 @@ void LGControllerComponent::configure_capabilities() {
 				this->overheating_select_->set_internal(false);
 			}
 		}
+
+		this->auto_dry_entity_->set_internal(!this->parse_capability(LgCapability::AUTO_DRY));
+		this->auto_dry_active_entity_->set_internal(!this->parse_capability(LgCapability::AUTO_DRY));
 	}
 
 	this->internal_thermistor_ = this->slave_;
@@ -380,6 +385,8 @@ void LGControllerComponent::add_entity(std::string entity_id, binary_sensor::Bin
 	} else if(entity_id == LG_ENTITY_OUTDOOR) {
 		this->outdoor_entity_ = entity;
 //		entity->publish_state(this->defrost_);
+	} else if(entity_id == LG_ENTITY_AUTO_DRY_ACTIVE) {
+		this->auto_dry_active_entity_ = entity;
 	}
 }
 
@@ -436,6 +443,8 @@ void LGControllerComponent::add_entity(std::string entity_id, switch_::Switch *e
 		this->purifier_entity_ = entity;
 	} else if(entity_id == LG_ENTITY_INTERNAL_THERMISTOR) {
 		this->internal_thermistor_entity_ = entity;
+	} else if(entity_id == LG_ENTITY_AUTO_DRY) {
+		this->auto_dry_entity_ = entity;
 	}
 }
 
@@ -637,6 +646,12 @@ void LGControllerComponent::send_type_a_settings_message() {
 	this->send_buf_[8] = (this->send_buf_[8] & 0xf0) | (this->vane_position_[2] & 0x0f); // Set vane 3
 	this->send_buf_[8] = (this->send_buf_[8] & 0x0f) | ((this->vane_position_[3] & 0x0f) << 4); // Set vane 4
 
+	// Set auto dry setting.
+	uint8_t b = this->send_buf_[11] & ~0x8;
+	if (this->auto_dry_) {
+		b |= 0x8;
+	}
+	this->send_buf_[11] = b;
 
 	this->send_buf_[12] = calc_checksum(this->send_buf_);
 
@@ -789,6 +804,13 @@ void LGControllerComponent::process_status_message(MessageSender sender, const u
 		this->outdoor_entity_->publish_state(this->outdoor_);
 	if (outdoor_changed) {
 		this->last_outdoor_change_millis_ = millis();
+	}
+
+	if (sender == MessageSender::Unit && this->auto_dry_entity_ != nullptr) {
+		bool unit_off = (buffer[1] & 0x2) == 0;
+		bool drying = (buffer[10] & 0x10) && unit_off;
+		if(this->auto_dry_active_entity_ != nullptr)
+			this->auto_dry_active_entity_->publish_state(drying);
 	}
 
 	bool read_temp = false;
@@ -1002,6 +1024,10 @@ void LGControllerComponent::process_type_a_settings_message(MessageSender sender
 		ESP_LOGE(TAG, "Unexpected vane 4 position: %u", vane4);
 	}
 
+	this->auto_dry_ = buffer[11] & 0x8;
+	if(this->auto_dry_entity_ != nullptr)
+		this->auto_dry_entity_->publish_state(this->auto_dry_);
+
 	if (sender != MessageSender::Slave) {
 		// Handle fan speed 0 (slow) change
 		this->fan_speed_[0] = buffer[2];
@@ -1172,7 +1198,7 @@ void LGControllerComponent::update() {
 				this->sleep_timer_->publish_state(0);
 			this->ignore_sleep_timer_callback_ = false;
 			this->mode = climate::CLIMATE_MODE_OFF;
-			this->set_changed();
+			this->pending_status_change_ = true;
 		} else if (optional<uint32_t> minutes = this->get_sleep_timer_minutes()) {
 			if (this->sleep_timer_ != nullptr && this->sleep_timer_->state != *minutes) {
 				this->ignore_sleep_timer_callback_ = true;

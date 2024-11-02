@@ -292,7 +292,14 @@ void LGControllerComponent::set_sleep_timer(int minutes) {
 		ESP_LOGE(TAG, "Ignoring sleep timer for slave controller");
 		return;
 	}
-	this->set_sleep_timer_internal(uint32_t(minutes));
+	ESP_LOGD(TAG, "Setting sleep timer: %d minutes", minutes);
+	if (minutes > 0) {
+		this->sleep_timer_target_millis_ = millis() + unsigned(minutes) * 60 * 1000;
+		this->active_reservation_ = true;
+	} else {
+		this->sleep_timer_target_millis_.reset();
+		this->active_reservation_ = false;
+	}
 	this->set_changed();
 }
 
@@ -347,17 +354,6 @@ void LGControllerComponent::set_swing_mode(climate::ClimateSwingMode mode) {
 		}
 	}
 	this->swing_mode = mode;
-}
-
-void LGControllerComponent::set_sleep_timer_internal(uint32_t minutes) {
-	ESP_LOGD(TAG, "Setting sleep timer: %u minutes", minutes);
-	if (minutes > 0) {
-		this->sleep_timer_target_millis_ = millis() + minutes * 60 * 1000;
-		this->active_reservation_ = true;
-	} else {
-		this->sleep_timer_target_millis_.reset();
-		this->active_reservation_ = false;
-	}
 }
 
 void LGControllerComponent::add_entity(std::string entity_id, binary_sensor::BinarySensor *entity) {

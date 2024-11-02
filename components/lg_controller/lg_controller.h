@@ -208,7 +208,6 @@ protected:
 	optional<uint32_t> get_sleep_timer_minutes();
 	static uint8_t calc_checksum(const uint8_t* buffer);
 	void set_swing_mode(climate::ClimateSwingMode mode);
-	void set_sleep_timer_internal(uint32_t minutes);
 	void send_status_message();
 	void send_type_a_settings_message();
 	void send_type_b_settings_message(bool timed);

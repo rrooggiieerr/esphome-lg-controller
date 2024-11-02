@@ -169,6 +169,8 @@ void LGControllerComponent::configure_capabilities() {
 			}
 		}
 
+		if (this->purifier_entity_ != nullptr)
+			this->purifier_entity_->set_internal(!this->parse_capability(LgCapability::PURIFIER));
 		if (this->auto_dry_entity_ != nullptr)
 			this->auto_dry_entity_->set_internal(!this->parse_capability(LgCapability::AUTO_DRY));
 		if (this->auto_dry_active_entity_ != nullptr)

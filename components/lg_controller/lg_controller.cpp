@@ -1,5 +1,9 @@
 #include "temp_conversion.h"
 
+#if defined(USE_ESP_IDF)
+#include "driver/gpio.h"
+#endif
+
 #include <set>
 
 namespace esphome {
@@ -305,7 +309,7 @@ void LGControllerComponent::set_sleep_timer(int minutes) {
 optional<float> LGControllerComponent::get_room_temp() {
 	if(this->temperature_sensor_ != nullptr) {
 		float temp = this->temperature_sensor_->get_state();
-		if (isnan(temp) || temp == 0) {
+		if (std::isnan(temp) || temp == 0) {
 			return {};
 		}
 		if (this->fahrenheit_) {
@@ -946,7 +950,7 @@ void LGControllerComponent::process_capabilities_message(MessageSender sender, c
 			pref.save(&this->nvs_storage_);
 			global_preferences->sync();
 			ESP_LOGD(TAG, "restarting to apply initial capabilities");
-			ESP.restart();
+			App.safe_reboot();
 		}
 		else {
 			ESP_LOGD(TAG, "updated device capabilities, manual restart required to take effect");
@@ -1210,7 +1214,13 @@ void LGControllerComponent::update() {
 	// collisions.
 	auto check_can_send = [&]() -> bool {
 		while (true) {
-			if (this->available() > 0 || digitalRead(RxPin) == LOW) {
+			if (this->available() > 0 ||
+				#if defined(USE_ESP_IDF)
+				gpio_get_level((gpio_num_t)RxPin) == 0
+				#elif defined(USE_ARDUINO)
+				digitalRead(RxPin) == LOW
+				#endif
+			) {
 				ESP_LOGD(TAG, "line busy, not sending yet");
 				return false;
 			}

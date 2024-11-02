@@ -1240,10 +1240,19 @@ void LGControllerComponent::update() {
 		}
 		return;
 	}
-	// Send a status message every 20 seconds, or now if we have a pending change.
+	// Send a status message if there is a pending change
+	// Additionally, queue a type a message after sending the status message
+	// If the swing mode does not include vertical, then the vane will be set to the previous setting
+	if (this->pending_status_change_) {
+		if (check_can_send()) {
+			this->send_status_message();
+			this->pending_type_a_settings_change_ = true;
+		}
+		return;
+	}
+	// Send a status message every 20 seconds
 	// Slave controllers only send this if needed.
-	if (this->pending_status_change_ ||
-		(!this->slave_ && millis_now - this->last_sent_status_millis_ > 20 * 1000)) {
+	if ((!slave_ && millis_now - this->last_sent_status_millis_ > 20 * 1000)) {
 		if (check_can_send()) {
 			this->send_status_message();
 		}

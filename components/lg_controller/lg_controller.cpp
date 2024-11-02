@@ -1,9 +1,5 @@
 #include "temp_conversion.h"
 
-#if defined(USE_ESP_IDF)
-#include "driver/gpio.h"
-#endif
-
 #include <set>
 
 namespace esphome {

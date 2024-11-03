@@ -67,15 +67,11 @@ class LGControllerComponent: public esphome::Component,
 		public climate::Climate,
 		public uart::UARTDevice {
 public:
-//	LGControllerComponent(uart::UARTComponent *parent) :  UARTDevice(parent){
-//		RxPin = parent->rx_pin_->get_pin();
-//	}
+	LGControllerComponent(InternalGPIOPin* rx_pin)
+	: rx_pin_(*rx_pin) {
+	}
 	void setup() override;
 	void dump_config() override;
-//	void set_uart_parent(uart::UARTComponent *parent) {
-//		RxPin = parent->rx_pin_->get_pin();
-//		uart::UARTDevice::set_uart_parent(parent);
-//	}
 	void set_temperature_sensor(sensor::Sensor *temperature_sensor) {
 		this->temperature_sensor_ = temperature_sensor;
 	}
@@ -113,11 +109,12 @@ public:
 	}
 protected:
 	static constexpr size_t MsgLen = 13;
-	static constexpr int RxPin = 26; // Keep in sync with rx_pin in base.yaml.
 
 	climate::ClimateTraits supported_traits_;
 
+    InternalGPIOPin &rx_pin_;
 	sensor::Sensor *temperature_sensor_;
+
 	select::Select *vane_select_1_;
 	select::Select *vane_select_2_;
 	select::Select *vane_select_3_;

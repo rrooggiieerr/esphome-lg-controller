@@ -1,7 +1,8 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
+from esphome import pins
 from esphome.components import uart
-from esphome.const import CONF_ID, CONF_SENSOR
+from esphome.const import CONF_ID, CONF_RX_PIN, CONF_SENSOR
 
 DEPENDENCIES = ["uart"]
 CODEOWNERS = ["@JanM321", "@rrooggiieerr"]
@@ -16,6 +17,7 @@ LGControllerComponent = lg_controller_ns.class_("LGControllerComponent", uart.UA
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.declare_id(LGControllerComponent),
+        cv.Required(CONF_RX_PIN): pins.gpio_input_pin_schema,
         cv.Optional(TEMPERATURE_SENSOR): cv.use_id(CONF_SENSOR),
         cv.Optional(SLAVE): cv.boolean,
         cv.Optional(FAHRENHEIT): cv.boolean,
@@ -23,7 +25,8 @@ CONFIG_SCHEMA = cv.Schema(
 ).extend(uart.UART_DEVICE_SCHEMA).extend(cv.COMPONENT_SCHEMA)
 
 async def to_code(config):
-    var = cg.new_Pvariable(config[CONF_ID])
+    rx_pin = await cg.gpio_pin_expression(config[CONF_RX_PIN])
+    var = cg.new_Pvariable(config[CONF_ID], rx_pin)
     
     if TEMPERATURE_SENSOR in config:
         temperature_sensor = await cg.get_variable(config[TEMPERATURE_SENSOR])

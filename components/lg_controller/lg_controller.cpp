@@ -1200,7 +1200,7 @@ void LGControllerComponent::update() {
 	// approximately the same time and the message will hopefully be corrupt (and ignored)
 	// anyway. Else the pending_send_/send_buf_ mechanism should catch it and we try again.
 	//
-	// Note: using digitalRead is *much* better for this than using serial_ because that
+	// Note: using digital_read is *much* better for this than using serial_ because that
 	// interface has significant delays. It has to wait for a full byte to arrive and this
 	// takes about 9-10 ms with our slow baud rate. There are also various buffers and
 	// timeouts before incoming bytes reach us.
@@ -1210,13 +1210,7 @@ void LGControllerComponent::update() {
 	// collisions.
 	auto check_can_send = [&]() -> bool {
 		while (true) {
-			if (this->available() > 0 ||
-				#if defined(USE_ESP_IDF)
-				gpio_get_level((gpio_num_t)RxPin) == 0
-				#elif defined(USE_ARDUINO)
-				digitalRead(RxPin) == LOW
-				#endif
-			) {
+			if (this->available() > 0 || !rx_pin_.digital_read()) {
 				ESP_LOGD(TAG, "line busy, not sending yet");
 				return false;
 			}

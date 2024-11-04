@@ -113,40 +113,40 @@ protected:
 	climate::ClimateTraits supported_traits_;
 
     InternalGPIOPin &rx_pin_;
-	sensor::Sensor *temperature_sensor_;
+	sensor::Sensor *temperature_sensor_{nullptr};
 
-	select::Select *vane_select_1_;
-	select::Select *vane_select_2_;
-	select::Select *vane_select_3_;
-	select::Select *vane_select_4_;
-	select::Select *overheating_select_;
+	select::Select *vane_select_1_{nullptr};
+	select::Select *vane_select_2_{nullptr};
+	select::Select *vane_select_3_{nullptr};
+	select::Select *vane_select_4_{nullptr};
+	select::Select *overheating_select_{nullptr};
 
-	number::Number *fan_speed_slow_;
-	number::Number *fan_speed_low_;
-	number::Number *fan_speed_medium_;
-	number::Number *fan_speed_high_;
+	number::Number *fan_speed_slow_{nullptr};
+	number::Number *fan_speed_low_{nullptr};
+	number::Number *fan_speed_medium_{nullptr};
+	number::Number *fan_speed_high_{nullptr};
 
-	number::Number *sleep_timer_;
+	number::Number *sleep_timer_{nullptr};
 
-	sensor::Sensor *error_code_;
-	sensor::Sensor *pipe_temp_in_;
-	sensor::Sensor *pipe_temp_mid_;
-	sensor::Sensor *pipe_temp_out_;
+	sensor::Sensor *error_code_{nullptr};
+	sensor::Sensor *pipe_temp_in_{nullptr};
+	sensor::Sensor *pipe_temp_mid_{nullptr};
+	sensor::Sensor *pipe_temp_out_{nullptr};
 	bool defrost_;
-	binary_sensor::BinarySensor *defrost_entity_;
+	binary_sensor::BinarySensor *defrost_entity_{nullptr};
 	bool preheat_;
-	binary_sensor::BinarySensor *preheat_entity_;
+	binary_sensor::BinarySensor *preheat_entity_{nullptr};
 	bool outdoor_;
-	binary_sensor::BinarySensor *outdoor_entity_;
-	binary_sensor::BinarySensor *auto_dry_active_entity_;
+	binary_sensor::BinarySensor *outdoor_entity_{nullptr};
+	binary_sensor::BinarySensor *auto_dry_active_entity_{nullptr};
 	uint32_t last_outdoor_change_millis_ = 0;
 
 	bool purifier_ = false;
-	switch_::Switch *purifier_entity_;
+	switch_::Switch *purifier_entity_{nullptr};
 	bool internal_thermistor_ = true;
-	switch_::Switch *internal_thermistor_entity_;
+	switch_::Switch *internal_thermistor_entity_{nullptr};
 	bool auto_dry_ = true;
-	switch_::Switch *auto_dry_entity_;
+	switch_::Switch *auto_dry_entity_{nullptr};
 
 	uint8_t recv_buf_[MsgLen] = { };
 	uint32_t recv_buf_len_ = 0;
@@ -223,7 +223,7 @@ public:
 		entity_id_ = entity_id;
 	}
 protected:
-	LGControllerComponent *parent_ { nullptr };
+	LGControllerComponent *parent_{nullptr};
 	std::string entity_id_;
 };
 

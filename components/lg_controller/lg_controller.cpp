@@ -1088,7 +1088,6 @@ void LGControllerComponent::process_type_b_settings_message(MessageSender sender
 		if (pipe_temp_in == INT8_MIN) {
 			this->pipe_temp_in_->set_internal(true);
 		} else {
-			this->pipe_temp_in_->set_internal(false);
 			this->pipe_temp_in_->publish_state(pipe_temp_in);
 		}
 	}
@@ -1098,7 +1097,6 @@ void LGControllerComponent::process_type_b_settings_message(MessageSender sender
 		if (pipe_temp_out == INT8_MIN) {
 			this->pipe_temp_out_->set_internal(true);
 		} else {
-			this->pipe_temp_out_->set_internal(false);
 			this->pipe_temp_out_->publish_state(pipe_temp_out);
 		}
 	}
@@ -1108,7 +1106,6 @@ void LGControllerComponent::process_type_b_settings_message(MessageSender sender
 		if (pipe_temp_mid == INT8_MIN) {
 			this->pipe_temp_mid_->set_internal(true);
 		} else {
-			this->pipe_temp_mid_->set_internal(false);
 			this->pipe_temp_mid_->publish_state(pipe_temp_mid);
 		}
 	}

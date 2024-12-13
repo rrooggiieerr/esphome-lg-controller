@@ -47,11 +47,13 @@ void LGSwitch::set_entity_id(std::string entity_id) {
 
 void LGSwitch::set_state(bool state) {
 	if(this->entity_id_ == LG_ENTITY_AIR_PURIFIER) {
+		this->parent_->set_purifier(state);
 	}
 	else if(this->entity_id_ == LG_ENTITY_INTERNAL_THERMISTOR) {
-//		this->parent_->set_
+		this->parent_->set_internal_thermistor(state);
 	}
 	else if(this->entity_id_ == LG_ENTITY_AUTO_DRY) {
+		this->parent_->set_auto_dry(state);
 	}
 }
 

@@ -98,6 +98,16 @@ public:
 	void set_overheating(int value);
 	void set_sleep_timer(int minutes);
 
+	void set_purifier(bool value) {
+		this->purifier_ = value;
+	}
+	void set_internal_thermistor(bool value) {
+		this->internal_thermistor_ = value;
+	}
+	void set_auto_dry(bool value) {
+		this->auto_dry_ = value;
+	}
+
 	void add_entity(std::string entity_id, binary_sensor::BinarySensor *entity);
 	void add_entity(std::string entity_id, number::Number *entity);
 	void add_entity(std::string entity_id, select::Select *entity);

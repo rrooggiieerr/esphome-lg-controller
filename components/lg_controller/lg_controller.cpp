@@ -423,10 +423,13 @@ void LGControllerComponent::add_entity(std::string entity_id, switch_::Switch *e
 
 	if(entity_id == LG_ENTITY_AIR_PURIFIER) {
 		this->purifier_entity_ = entity;
+		this->purifier_ = this->purifier_entity_->state;
 	} else if(entity_id == LG_ENTITY_INTERNAL_THERMISTOR) {
 		this->internal_thermistor_entity_ = entity;
+		this->internal_thermistor_ = this->internal_thermistor_entity_->state;
 	} else if(entity_id == LG_ENTITY_AUTO_DRY) {
 		this->auto_dry_entity_ = entity;
+		this->auto_dry_ = this->auto_dry_entity_->state;
 	}
 }
 

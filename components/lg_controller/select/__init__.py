@@ -28,9 +28,9 @@ async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
 
-    options = ["0 (Default)", "1 (Up)", "2", "3", "4", "5", "6 (Down)" ]
+    options = ["Default", "Up", "2", "3", "4", "5", "Down" ]
     if config[ENTITY_ID] == "overheating":
-        options = ["0 (Default)", "1 (+4C/+6C)", "2 (+2C/+4C)", "3 (-1C/+1C)", "4 (-0.5C/+0.5C)"]
+        options = ["Default", "+4°C/+6°C", "+2°C/+4°C", "-1°C/+1°C", "-0.5°C/+0.5°C"]
 
     await select.register_select(var, config, options=options)
     await lg_controller.register_lg_device(var, config)

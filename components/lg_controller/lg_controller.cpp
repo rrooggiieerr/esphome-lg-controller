@@ -1252,7 +1252,7 @@ void LGControllerComponent::update() {
 	}
 	// Send a status message every 20 seconds
 	// Slave controllers only send this if needed.
-	if ((!slave_ && millis_now - this->last_sent_status_millis_ > 20 * 1000)) {
+	if ((!this->slave_ && millis_now - this->last_sent_status_millis_ > 20 * 1000)) {
 		if (check_can_send()) {
 			this->send_status_message();
 		}

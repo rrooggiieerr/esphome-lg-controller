@@ -230,7 +230,7 @@ class LGEntity {
 public:
 	void set_lg_controller_parent(LGControllerComponent *parent);
 	void set_entity_id(std::string entity_id) {
-		entity_id_ = entity_id;
+		this->entity_id_ = entity_id;
 	}
 protected:
 	LGControllerComponent *parent_{nullptr};

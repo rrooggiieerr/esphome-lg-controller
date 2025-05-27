@@ -484,7 +484,7 @@ void LGControllerComponent::send_status_message() {
 			b |= 4 << 5;
 			break;
 		default:
-			ESP_LOGE(TAG, "unknown fan mode, using Medium");
+			ESP_LOGE(TAG, "unknown fan mode %u, using Medium", this->fan_mode);
 			b |= 1 << 5;
 			break;
 	}
@@ -508,7 +508,7 @@ void LGControllerComponent::send_status_message() {
 			b |= 0x40 | 0x80;
 			break;
 		default:
-			ESP_LOGE(TAG, "unknown swing mode");
+			ESP_LOGE(TAG, "unknown swing mode %u", this->swing_mode);
 			break;
 	}
 	this->send_buf_[2] = b;
@@ -1042,6 +1042,8 @@ void LGControllerComponent::process_type_b_settings_message(MessageSender sender
 		return;
 	}
 
+	ESP_LOGD(TAG, "Received type b settings message");
+
 	// Send installer settings the first time we receive a 0xCB message.
 	bool first_time = this->last_recv_type_b_settings_[0] == 0;
 	memcpy(this->last_recv_type_b_settings_, buffer, MsgLen);
@@ -1088,6 +1090,7 @@ void LGControllerComponent::process_type_b_settings_message(MessageSender sender
 
 	int8_t pipe_temp_in = PipeTempTable[buffer[3]];
 	if(this->pipe_temp_in_ != nullptr) {
+		ESP_LOGD(TAG, "Received pipe temperature in %d", pipe_temp_in);
 		if (pipe_temp_in == INT8_MIN) {
 			this->pipe_temp_in_->set_internal(true);
 		} else {
@@ -1097,6 +1100,7 @@ void LGControllerComponent::process_type_b_settings_message(MessageSender sender
 
 	int8_t pipe_temp_out = PipeTempTable[buffer[4]];
 	if(this->pipe_temp_out_ != nullptr) {
+		ESP_LOGD(TAG, "Received pipe temperature out %d", pipe_temp_out);
 		if (pipe_temp_out == INT8_MIN) {
 			this->pipe_temp_out_->set_internal(true);
 		} else {
@@ -1106,6 +1110,7 @@ void LGControllerComponent::process_type_b_settings_message(MessageSender sender
 
 	int8_t pipe_temp_mid = PipeTempTable[buffer[5]];
 	if(this->pipe_temp_mid_ != nullptr) {
+		ESP_LOGD(TAG, "Received pipe temperature mid %d", pipe_temp_mid);
 		if (pipe_temp_mid == INT8_MIN) {
 			this->pipe_temp_mid_->set_internal(true);
 		} else {
@@ -1163,6 +1168,7 @@ void LGControllerComponent::update() {
 	}
 
 	if (had_error) {
+		ESP_LOGE(TAG, "Had error");
 		return;
 	}
 
@@ -1222,12 +1228,14 @@ void LGControllerComponent::update() {
 	};
 
 	if (this->pending_type_a_settings_change_) {
+		ESP_LOGD(TAG, "update sending type a settings");
 		if (check_can_send()) {
 			this->send_type_a_settings_message();
 		}
 		return;
 	}
 	if (this->pending_type_b_settings_change_) {
+		ESP_LOGD(TAG, "update sending type b settings");
 		if (check_can_send()) {
 			this->send_type_b_settings_message(/* timed = */ false);
 		}
@@ -1235,6 +1243,7 @@ void LGControllerComponent::update() {
 	}
 	// Send an AB message every 10 minutes to request pipe temperature values.
 	if (!this->slave_ && (millis_now - this->last_sent_recv_type_b_millis_) > 10 * 60 * 1000) {
+		ESP_LOGD(TAG, "update Request pipe temperatures");
 		if (check_can_send()) {
 			this->send_type_b_settings_message(/* timed = */ true);
 		}
@@ -1244,6 +1253,7 @@ void LGControllerComponent::update() {
 	// Additionally, queue a type a message after sending the status message
 	// If the swing mode does not include vertical, then the vane will be set to the previous setting
 	if (this->pending_status_change_) {
+		ESP_LOGD(TAG, "update Send a status message if there is a pending change");
 		if (check_can_send()) {
 			this->send_status_message();
 			this->pending_type_a_settings_change_ = true;
@@ -1253,6 +1263,7 @@ void LGControllerComponent::update() {
 	// Send a status message every 20 seconds
 	// Slave controllers only send this if needed.
 	if ((!this->slave_ && millis_now - this->last_sent_status_millis_ > 20 * 1000)) {
+		ESP_LOGD(TAG, "update Send a status message every 20 seconds");
 		if (check_can_send()) {
 			this->send_status_message();
 		}

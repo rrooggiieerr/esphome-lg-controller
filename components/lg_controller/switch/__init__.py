@@ -15,7 +15,7 @@ LG_ENTITY_AUTO_DRY = "auto_dry"
 
 LGSwitch = lg_controller_ns.class_("LGSwitch", cg.Component, switch.Switch)
 
-CONFIG_SCHEMA = cv.All(switch.SWITCH_SCHEMA.extend(LG_DEVICE_SCHEMA).extend(
+CONFIG_SCHEMA = cv.All(switch.switch_schema(LGSwitch).extend(LG_DEVICE_SCHEMA).extend(
     {
         cv.GenerateID(CONF_ID): cv.declare_id(LGSwitch),
         cv.Required(ENTITY_ID): cv.one_of(LG_ENTITY_AIR_PURIFIER, LG_ENTITY_INTERNAL_THERMISTOR, LG_ENTITY_AUTO_DRY),

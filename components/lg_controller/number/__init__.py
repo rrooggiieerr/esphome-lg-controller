@@ -17,7 +17,7 @@ LG_ENTITY_SLEEP_TIMER = "sleep_timer"
 
 LGNumber = lg_controller_ns.class_("LGNumber", number.Number, cg.Component)
 
-CONFIG_SCHEMA = cv.All(number.NUMBER_SCHEMA.extend(LG_DEVICE_SCHEMA).extend(
+CONFIG_SCHEMA = cv.All(number.number_schema(LGNumber).extend(LG_DEVICE_SCHEMA).extend(
     {
         cv.GenerateID(CONF_ID): cv.declare_id(LGNumber),
         cv.Required(ENTITY_ID): cv.one_of(LG_ENTITY_FAN_SPEED_SLOW, LG_ENTITY_FAN_SPEED_LOW, LG_ENTITY_FAN_SPEED_MEDIUM, LG_ENTITY_FAN_SPEED_HIGH, LG_ENTITY_SLEEP_TIMER),

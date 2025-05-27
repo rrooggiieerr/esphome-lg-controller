@@ -17,7 +17,7 @@ LG_ENTITY_OVERHEATING = "overheating"
 
 LGSelect = lg_controller_ns.class_("LGSelect", select.Select, cg.Component)
 
-CONFIG_SCHEMA = cv.All(select.SELECT_SCHEMA.extend(LG_DEVICE_SCHEMA).extend(
+CONFIG_SCHEMA = cv.All(select.select_schema(LGSelect).extend(LG_DEVICE_SCHEMA).extend(
     {
         cv.GenerateID(CONF_ID): cv.declare_id(LGSelect),
         cv.Required(ENTITY_ID): cv.one_of(LG_ENTITY_VANE_POSITION_1, LG_ENTITY_VANE_POSITION_2, LG_ENTITY_VANE_POSITION_3, LG_ENTITY_VANE_POSITION_4, LG_ENTITY_OVERHEATING),

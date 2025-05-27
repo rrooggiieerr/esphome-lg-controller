@@ -16,7 +16,7 @@ LG_ENTITY_PIPE_TEMPERATURE_OUT = "pipe_temperature_out"
 
 LGSensor = lg_controller_ns.class_("LGSensor", sensor.Sensor, cg.Component)
 
-CONFIG_SCHEMA = cv.All(sensor.SENSOR_SCHEMA.extend(LG_DEVICE_SCHEMA).extend(
+CONFIG_SCHEMA = cv.All(sensor.sensor_schema(LGSensor).extend(LG_DEVICE_SCHEMA).extend(
     {
         cv.GenerateID(CONF_ID): cv.declare_id(LGSensor),
         cv.Required(ENTITY_ID): cv.one_of(LG_ENTITY_ERROR_CODE, LG_ENTITY_PIPE_TEMPERATURE_IN, LG_ENTITY_PIPE_TEMPERATURE_MID, LG_ENTITY_PIPE_TEMPERATURE_OUT),

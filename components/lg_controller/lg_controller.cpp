@@ -62,29 +62,27 @@ bool LGControllerComponent::parse_capability(LgCapability capability) {
 
 void LGControllerComponent::configure_capabilities() {
 	// Default traits
-	this->supported_traits_.set_supported_modes({
-		climate::CLIMATE_MODE_OFF,
-		climate::CLIMATE_MODE_COOL,
-		climate::CLIMATE_MODE_HEAT,
-		climate::CLIMATE_MODE_DRY,
-		climate::CLIMATE_MODE_FAN_ONLY,
-		climate::CLIMATE_MODE_HEAT_COOL,
-	});
-	this->supported_traits_.set_supported_fan_modes({
-		climate::CLIMATE_FAN_LOW,
-		climate::CLIMATE_FAN_MEDIUM,
-		climate::CLIMATE_FAN_HIGH,
-		climate::CLIMATE_FAN_AUTO,
-	});
-	this->supported_traits_.set_supported_swing_modes({
-		climate::CLIMATE_SWING_OFF,
-		climate::CLIMATE_SWING_BOTH,
-		climate::CLIMATE_SWING_VERTICAL,
-		climate::CLIMATE_SWING_HORIZONTAL,
-	});
-	this->supported_traits_.set_supports_current_temperature(true);
-	this->supported_traits_.set_supports_two_point_target_temperature(false);
-	this->supported_traits_.set_supports_action(false);
+	climate::ClimateModeMask device_modes;
+	device_modes.insert(climate::CLIMATE_MODE_OFF);
+	device_modes.insert(climate::CLIMATE_MODE_COOL);
+	device_modes.insert(climate::CLIMATE_MODE_HEAT);
+	device_modes.insert(climate::CLIMATE_MODE_DRY);
+	device_modes.insert(climate::CLIMATE_MODE_FAN_ONLY);
+	device_modes.insert(climate::CLIMATE_MODE_HEAT_COOL);
+
+	climate::ClimateFanModeMask fan_modes;
+	fan_modes.insert(climate::CLIMATE_FAN_LOW);
+	fan_modes.insert(climate::CLIMATE_FAN_MEDIUM);
+	fan_modes.insert(climate::CLIMATE_FAN_HIGH);
+	fan_modes.insert(climate::CLIMATE_FAN_AUTO);
+
+	climate::ClimateSwingModeMask swing_modes;
+	swing_modes.insert(climate::CLIMATE_SWING_OFF);
+	swing_modes.insert(climate::CLIMATE_SWING_BOTH);
+	swing_modes.insert(climate::CLIMATE_SWING_VERTICAL);
+	swing_modes.insert(climate::CLIMATE_SWING_HORIZONTAL);
+
+	supported_traits_.add_feature_flags(climate::CLIMATE_SUPPORTS_CURRENT_TEMPERATURE);
 	this->supported_traits_.set_visual_min_temperature(MIN_TEMP_SETPOINT);
 	this->supported_traits_.set_visual_max_temperature(MAX_TEMP_SETPOINT);
 	this->supported_traits_.set_visual_current_temperature_step(this->fahrenheit_ ? 1 : 0.5);
@@ -93,41 +91,41 @@ void LGControllerComponent::configure_capabilities() {
 	// Only override defaults if the capabilities are known
 	if (this->nvs_storage_.capabilities_message[0] != 0) {
 		// Configure the climate traits
-		std::set<climate::ClimateMode> device_modes;
-		device_modes.insert(climate::CLIMATE_MODE_OFF);
-		device_modes.insert(climate::CLIMATE_MODE_COOL);
-		if (this->parse_capability(LgCapability::MODE_HEATING))
-			device_modes.insert(climate::CLIMATE_MODE_HEAT);
-		if (this->parse_capability(LgCapability::MODE_FAN))
-			device_modes.insert(climate::CLIMATE_MODE_FAN_ONLY);
-		if (this->parse_capability(LgCapability::MODE_AUTO))
-			device_modes.insert(climate::CLIMATE_MODE_HEAT_COOL);
-		if (this->parse_capability(LgCapability::MODE_DEHUMIDIFY))
-			device_modes.insert(climate::CLIMATE_MODE_DRY);
-		this->supported_traits_.set_supported_modes(device_modes);
+        climate::ClimateModeMask override_device_modes;
+        override_device_modes.insert(climate::CLIMATE_MODE_OFF);
+        override_device_modes.insert(climate::CLIMATE_MODE_COOL);
+        if (parse_capability(LgCapability::MODE_HEATING))
+            override_device_modes.insert(climate::CLIMATE_MODE_HEAT);
+        if (parse_capability(LgCapability::MODE_FAN))
+            override_device_modes.insert(climate::CLIMATE_MODE_FAN_ONLY);
+        if (parse_capability(LgCapability::MODE_AUTO))
+            override_device_modes.insert(climate::CLIMATE_MODE_HEAT_COOL);
+        if (parse_capability(LgCapability::MODE_DEHUMIDIFY))
+            override_device_modes.insert(climate::CLIMATE_MODE_DRY);
+        supported_traits_.set_supported_modes(override_device_modes);
 
-		std::set<climate::ClimateFanMode> fan_modes;
-		if (this->parse_capability(LgCapability::FAN_AUTO))
-			fan_modes.insert(climate::CLIMATE_FAN_AUTO);
-		if (this->parse_capability(LgCapability::FAN_SLOW))
-			fan_modes.insert(climate::CLIMATE_FAN_QUIET);
-		if (this->parse_capability(LgCapability::FAN_LOW))
-			fan_modes.insert(climate::CLIMATE_FAN_LOW);
-		if (this->parse_capability(LgCapability::FAN_MEDIUM))
-			fan_modes.insert(climate::CLIMATE_FAN_MEDIUM);
-		if (this->parse_capability(LgCapability::FAN_HIGH))
-			fan_modes.insert(climate::CLIMATE_FAN_HIGH);
-		this->supported_traits_.set_supported_fan_modes(fan_modes);
+        climate::ClimateFanModeMask override_fan_modes;
+        if (parse_capability(LgCapability::FAN_AUTO))
+            override_fan_modes.insert(climate::CLIMATE_FAN_AUTO);
+        if (parse_capability(LgCapability::FAN_SLOW))
+            override_fan_modes.insert(climate::CLIMATE_FAN_QUIET);
+        if (parse_capability(LgCapability::FAN_LOW))
+            override_fan_modes.insert(climate::CLIMATE_FAN_LOW);
+        if (parse_capability(LgCapability::FAN_MEDIUM))
+            override_fan_modes.insert(climate::CLIMATE_FAN_MEDIUM);
+        if (parse_capability(LgCapability::FAN_HIGH))
+            override_fan_modes.insert(climate::CLIMATE_FAN_HIGH);
+        supported_traits_.set_supported_fan_modes(override_fan_modes);
 
-		std::set<climate::ClimateSwingMode> swing_modes;
-		swing_modes.insert(climate::CLIMATE_SWING_OFF);
-		if (this->parse_capability(LgCapability::VERTICAL_SWING) && parse_capability(LgCapability::HORIZONTAL_SWING))
-			swing_modes.insert(climate::CLIMATE_SWING_BOTH);
-		if (this->parse_capability(LgCapability::VERTICAL_SWING))
-			swing_modes.insert(climate::CLIMATE_SWING_VERTICAL);
-		if (this->parse_capability(LgCapability::HORIZONTAL_SWING))
-			swing_modes.insert(climate::CLIMATE_SWING_HORIZONTAL);
-		this->supported_traits_.set_supported_swing_modes(swing_modes);
+        climate::ClimateSwingModeMask override_swing_modes;
+        override_swing_modes.insert(climate::CLIMATE_SWING_OFF);
+        if (parse_capability(LgCapability::VERTICAL_SWING) && parse_capability(LgCapability::HORIZONTAL_SWING))
+            override_swing_modes.insert(climate::CLIMATE_SWING_BOTH);
+        if (parse_capability(LgCapability::VERTICAL_SWING))
+            override_swing_modes.insert(climate::CLIMATE_SWING_VERTICAL);
+        if (parse_capability(LgCapability::HORIZONTAL_SWING))
+            override_swing_modes.insert(climate::CLIMATE_SWING_HORIZONTAL);
+        supported_traits_.set_supported_swing_modes(override_swing_modes);
 
 		// Disable unsupported entities
 		if (this->vane_select_1_ != nullptr && !this->parse_capability(LgCapability::HAS_ONE_VANE))
@@ -467,27 +465,35 @@ void LGControllerComponent::send_status_message() {
 			b |= (2 << 2);
 			break;
 	}
-	switch (*this->fan_mode) {
-		case climate::CLIMATE_FAN_LOW:
-			b |= 0 << 5;
-			break;
-		case climate::CLIMATE_FAN_MEDIUM:
-			b |= 1 << 5;
-			break;
-		case climate::CLIMATE_FAN_HIGH:
-			b |= 2 << 5;
-			break;
-		case climate::CLIMATE_FAN_AUTO:
-			b |= 3 << 5;
-			break;
-		case climate::CLIMATE_FAN_QUIET:
-			b |= 4 << 5;
-			break;
-		default:
-			ESP_LOGE(TAG, "unknown fan mode %u, using Medium", this->fan_mode);
-			b |= 1 << 5;
-			break;
-	}
+
+	// Check if fan_mode has a value before dereferencing
+	if (this->fan_mode.has_value()) {
+		switch (this->fan_mode.value()) {
+			case climate::CLIMATE_FAN_LOW:
+				b |= 0 << 5;
+				break;
+			case climate::CLIMATE_FAN_MEDIUM:
+				b |= 1 << 5;
+				break;
+			case climate::CLIMATE_FAN_HIGH:
+				b |= 2 << 5;
+				break;
+			case climate::CLIMATE_FAN_AUTO:
+				b |= 3 << 5;
+				break;
+			case climate::CLIMATE_FAN_QUIET:
+				b |= 4 << 5;
+				break;
+			default:
+				ESP_LOGE(TAG, "unknown fan mode %u, using Medium", this->fan_mode);
+				b |= 1 << 5;
+				break;
+		}
+    } else {
+        // Default to Medium if no fan mode is set
+        ESP_LOGD(TAG, "no fan mode set, using Medium as default");
+        b |= 1 << 5;
+    }
 	this->send_buf_[1] = b;
 
 	// Byte 2: swing mode and purifier/plasma setting. Preserve the other bits.

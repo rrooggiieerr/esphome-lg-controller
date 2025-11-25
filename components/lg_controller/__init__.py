@@ -1,20 +1,21 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome import pins
-from esphome.components import uart
+from esphome.components import climate, uart
 from esphome.const import CONF_ID, CONF_RX_PIN, CONF_SENSOR
 
 DEPENDENCIES = ["uart"]
 CODEOWNERS = ["@JanM321", "@rrooggiieerr"]
+AUTO_LOAD = ["climate"]
 
 TEMPERATURE_SENSOR = 'temperature_sensor'
 SLAVE = 'slave'
 FAHRENHEIT = 'fahrenheit'
 
 lg_controller_ns = cg.esphome_ns.namespace("lg_controller")
-LGControllerComponent = lg_controller_ns.class_("LGControllerComponent", uart.UARTDevice, cg.Component)
+LGControllerComponent = lg_controller_ns.class_("LGControllerComponent", uart.UARTDevice, climate.Climate, cg.Component)
 
-CONFIG_SCHEMA = cv.Schema(
+CONFIG_SCHEMA = cv.All(climate.climate_schema(LGControllerComponent).extend(
     {
         cv.GenerateID(): cv.declare_id(LGControllerComponent),
         cv.Required(CONF_RX_PIN): pins.gpio_input_pin_schema,
@@ -22,7 +23,7 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional(SLAVE): cv.boolean,
         cv.Optional(FAHRENHEIT): cv.boolean,
     }
-).extend(uart.UART_DEVICE_SCHEMA).extend(cv.COMPONENT_SCHEMA)
+).extend(uart.UART_DEVICE_SCHEMA).extend(cv.COMPONENT_SCHEMA))
 
 async def to_code(config):
     rx_pin = await cg.gpio_pin_expression(config[CONF_RX_PIN])
@@ -38,6 +39,7 @@ async def to_code(config):
     
     await cg.register_component(var, config)
     await uart.register_uart_device(var, config)
+    await climate.register_climate(var, config)
 
 # A schema to use for all LG Controller devices, all LG Controller integrations must extend this!
 CONF_LG_CONTROLLER_ID = 'lg_controller_id'

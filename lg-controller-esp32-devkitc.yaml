@@ -1,0 +1,126 @@
+# These substitutions allow the end user to override certain values
+substitutions:
+  name: "lg-controller"
+  friendly_name: "LG Controller"
+
+packages:
+  core: !include esp32-devkitc.yaml
+
+esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
+  comment: "LG Heatpump Controller"
+  # Automatically add the mac address to the name
+  # so you can use a single firmware for all devices
+  name_add_mac_suffix: True
+
+external_components:
+  - source: github://rrooggiieerr/esphome-lg-controller@main
+    components: [lg_controller]
+
+lg_controller:
+  id: lg_heatpump
+  uart_id: lg_serial
+  name: LG Heatpump
+
+sensor:
+  - platform: lg_controller
+    name: Error Code
+    entity_id: error_code
+    entity_category: diagnostic
+  - platform: lg_controller
+    name: Pipe Temperature In
+    entity_id: pipe_temperature_in
+    entity_category: diagnostic
+  - platform: lg_controller
+    name: Pipe Temperature Mid
+    entity_id: pipe_temperature_mid
+    entity_category: diagnostic
+  - platform: lg_controller
+    name: Pipe Temperature Out
+    entity_id: pipe_temperature_out
+    entity_category: diagnostic
+
+binary_sensor:
+  - platform: lg_controller
+    name: Defrost
+    entity_id: defrost
+    entity_category: diagnostic
+  - platform: lg_controller
+    name: Preheat
+    entity_id: preheat
+    entity_category: diagnostic
+  - platform: lg_controller
+    name: Outdoor Unit
+    entity_id: outdoor
+    entity_category: diagnostic
+  - platform: lg_controller
+    name: Auto Dry Active
+    entity_id: auto_dry_active
+    entity_category: diagnostic
+
+switch:
+  - platform: lg_controller
+    name: Air Purifier
+    entity_id: air_purifier
+  - platform: lg_controller
+    name: Internal Thermistor
+    entity_id: internal_thermistor
+    entity_category: config
+  - platform: lg_controller
+    name: Auto Dry
+    entity_id: auto_dry
+
+select:
+  - platform: lg_controller
+    name: Vane Position
+    entity_id: vane_position_1
+  - platform: lg_controller
+    name: Airflow 2 Up/Down
+    entity_id: vane_position_2
+  - platform: lg_controller
+    name: Airflow 3 Up/Down
+    entity_id: vane_position_3
+  - platform: lg_controller
+    name: Airflow 4 Up/Down
+    entity_id: vane_position_4
+  - platform: lg_controller
+    name: Overheating # Installer setting 15.
+    entity_id: overheating
+    entity_category: config
+
+number:
+  - platform: lg_controller
+    entity_id: fan_speed_slow
+    name: "Fan Speed Slow"
+    mode: box
+    entity_category: config
+    internal: true
+  - platform: lg_controller
+    entity_id: fan_speed_low
+    name: "Fan Speed Low"
+    mode: box
+    entity_category: config
+    internal: true
+  - platform: lg_controller
+    entity_id: fan_speed_medium
+    name: "Fan Speed Medium"
+    mode: box
+    entity_category: config
+    internal: true
+  - platform: lg_controller
+    entity_id: fan_speed_high
+    name: "Fan Speed High"
+    id: fan_speed_high
+    mode: box
+    entity_category: config
+    internal: true
+  - platform: lg_controller
+    entity_id: sleep_timer
+    name: "Sleep Timer"
+    mode: box
+    internal: true
+
+# climate:
+#   - platform: lg_controller
+#     name: Heatpump

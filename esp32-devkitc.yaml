@@ -25,11 +25,3 @@ binary_sensor:
       inverted: True
       ignore_strapping_warning: True
     internal: True
-
-uart:
-  - id: lg_serial
-    tx_pin: GPIO25
-    rx_pin:
-      number: GPIO26 # Keep in sync with rx_pin below.
-      allow_other_uses: true
-    baud_rate: 104

@@ -22,9 +22,20 @@ external_components:
       ref: main
     components: [lg_controller]
 
+uart:
+  - id: ac_serial
+    tx_pin: GPIO25
+    rx_pin:
+      number: GPIO26 # Keep in sync with rx_pin below.
+      allow_other_uses: true
+    baud_rate: 104
+
 lg_controller:
   id: lg_heatpump
   uart_id: lg_serial
+  rx_pin:
+    number: GPIO26 # Keep in sync with UART rx_pin.
+    allow_other_uses: true
   name: LG Heatpump
 
 sensor:

@@ -15,7 +15,11 @@ esphome:
   name_add_mac_suffix: True
 
 external_components:
-  - source: github://rrooggiieerr/esphome-lg-controller@main
+  - source:
+      type: git
+      url: https://github.com/rrooggiieerr/esphome-lg-controller
+      path: components
+      ref: main
     components: [lg_controller]
 
 lg_controller:

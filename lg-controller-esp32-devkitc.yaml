@@ -23,7 +23,7 @@ external_components:
     components: [lg_controller]
 
 uart:
-  - id: ac_serial
+  - id: lg_serial
     tx_pin: GPIO25
     rx_pin:
       number: GPIO26 # Keep in sync with rx_pin below.

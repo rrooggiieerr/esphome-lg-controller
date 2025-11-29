@@ -10,14 +10,6 @@ binary_sensor:
           - OFF for 0.1s to 2s
           - ON for at least 5s 
         then:
-          - repeat: 
-              count: 5
-              then:
-                - light.turn_on: _status_led
-                - delay: 150ms
-                - light.turn_off: _status_led
-                - delay: 150ms
-          - light.turn_on: _status_led
           - button.press: factory_reset_button
 
 button:

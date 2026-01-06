@@ -120,13 +120,13 @@ select:
     name: Vane Position
     entity_id: vane_position_1
   - platform: lg_controller
-    name: Airflow 2 Up/Down
+    name: Vane Position 2
     entity_id: vane_position_2
   - platform: lg_controller
-    name: Airflow 3 Up/Down
+    name: Vane Position 3
     entity_id: vane_position_3
   - platform: lg_controller
-    name: Airflow 4 Up/Down
+    name: Vane Position 4
     entity_id: vane_position_4
   - platform: lg_controller
     name: Overheating # Installer setting 15.

@@ -534,10 +534,16 @@ void LGControllerComponent::send_status_message() {
 	if (this->fahrenheit_) {
 		target = TempConversion::celsius_to_lgcelsius(target);
 	}
+
+	// Calculate if we need a temperature offset and how much.
 	if (target < MIN_TEMP_SETPOINT) {
-		target = MIN_TEMP_SETPOINT;
+		this->temperature_offset_ = std::floor(target - MIN_TEMP_SETPOINT);
+		target = target - this->temperature_offset_;
 	} else if (target > MAX_TEMP_SETPOINT) {
-		target = MAX_TEMP_SETPOINT;
+		this->temperature_offset_ = std::ceil(target - MAX_TEMP_SETPOINT);
+		target = target - this->temperature_offset_;
+	} else {
+		this->temperature_offset_ = 0;
 	}
 
 	// Byte 5. Unchanged except for the low bit which indicates the target temperature has a
@@ -553,7 +559,7 @@ void LGControllerComponent::send_status_message() {
 	ThermistorSetting thermistor =
 			this->internal_thermistor_ ? ThermistorSetting::Unit : ThermistorSetting::Controller;
 	float temp;
-	if (auto maybe_temp = get_room_temp()) {
+	if (auto maybe_temp = this->get_room_temp()) {
 		temp = *maybe_temp;
 	} else {
 		// Room temperature isn't available. Use the unit's thermistor and send something
@@ -561,6 +567,7 @@ void LGControllerComponent::send_status_message() {
 		thermistor = ThermistorSetting::Unit;
 		temp = 20;
 	}
+	temp = temp - this->temperature_offset_;
 	this->send_buf_[6] = (thermistor << 4) | ((uint8_t(target) - 15) & 0xf);
 	this->send_buf_[7] = (this->last_recv_status_[7] & 0xC0) | uint8_t((temp - 10) * 2);
 
@@ -603,7 +610,7 @@ void LGControllerComponent::send_status_message() {
 	// If we sent an updated temperature to the AC, update temperature in HA too.
 	// Slave controller temperature sensor is ignored.
 	if (!this->slave_ && thermistor == ThermistorSetting::Controller) {
-		float ha_temp = temp;
+		float ha_temp = temp + this->temperature_offset_;
 		if (this->fahrenheit_) {
 			ha_temp = TempConversion::lgcelsius_to_celsius(ha_temp);
 		}
@@ -819,6 +826,7 @@ void LGControllerComponent::process_status_message(MessageSender sender, const u
 		if (this->fahrenheit_) {
 			room_temp = TempConversion::lgcelsius_to_celsius(room_temp);
 		}
+		room_temp = room_temp + this->temperature_offset_;
 		if (this->current_temperature != room_temp) {
 			this->current_temperature = room_temp;
 			this->publish_state();
@@ -914,6 +922,7 @@ void LGControllerComponent::process_status_message(MessageSender sender, const u
 	if (this->fahrenheit_) {
 		target = TempConversion::lgcelsius_to_celsius(target);
 	}
+	target = target + this->temperature_offset_;
 	this->target_temperature = target;
 
 	this->active_reservation_ = buffer[3] & 0x10;

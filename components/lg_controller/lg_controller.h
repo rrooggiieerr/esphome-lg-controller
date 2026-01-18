@@ -124,6 +124,7 @@ protected:
 
     InternalGPIOPin &rx_pin_;
 	sensor::Sensor *temperature_sensor_{nullptr};
+	int temperature_offset_ = 0;
 
 	select::Select *vane_select_1_{nullptr};
 	select::Select *vane_select_2_{nullptr};

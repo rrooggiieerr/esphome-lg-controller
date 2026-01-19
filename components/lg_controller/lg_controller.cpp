@@ -156,10 +156,10 @@ void LGControllerComponent::configure_capabilities() {
 			this->auto_dry_active_entity_->set_internal(true);
 	}
 
-	if(this->internal_thermistor_entity_ != nullptr && this->slave_)
-		this->internal_thermistor_entity_->set_internal(true);
-	if(this->sleep_timer_ != nullptr && this->slave_)
-		this->sleep_timer_->set_internal(true);
+	if(this->internal_thermistor_entity_ != nullptr)
+		this->internal_thermistor_entity_->set_internal(this->slave_);
+	if(this->sleep_timer_ != nullptr)
+		this->sleep_timer_->set_internal(this->slave_);
 }
 
 void LGControllerComponent::setup() {
@@ -283,10 +283,6 @@ void LGControllerComponent::set_sleep_timer(int minutes) {
 	// 0 clears the timer. Accept max 7 hours.
 	if (minutes < 0 || minutes > 7 * 60) {
 		ESP_LOGE(TAG, "Ignoring invalid sleep timer value: %d minutes", minutes);
-		return;
-	}
-	if (this->slave_) {
-		ESP_LOGE(TAG, "Ignoring sleep timer for slave controller");
 		return;
 	}
 	ESP_LOGD(TAG, "Setting sleep timer: %d minutes", minutes);
@@ -928,7 +924,7 @@ void LGControllerComponent::process_status_message(MessageSender sender, const u
 	this->active_reservation_ = buffer[3] & 0x10;
 
 	// Set or clear sleep timer.
-	if (!this->slave_ && this->sleep_timer_ != nullptr) {
+	if (this->sleep_timer_ != nullptr) {
 		if (this->sleep_timer_target_millis_.has_value() && !this->active_reservation_) {
 			this->sleep_timer_->publish_state(0);
 		} else if (((buffer[8] >> 3) & 0x7) == 3) {
@@ -1276,7 +1272,7 @@ void LGControllerComponent::update() {
 		return;
 	}
 	// Send a status message every 20 seconds
-	// Slave controllers only send this if needed.
+	// Slave controllers only send a status message when settings are changed.
 	if ((!this->slave_ && millis_now - this->last_sent_status_millis_ > 20 * 1000)) {
 		ESP_LOGD(TAG, "update Send a status message every 20 seconds");
 		if (check_can_send()) {

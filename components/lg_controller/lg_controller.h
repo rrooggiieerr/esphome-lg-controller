@@ -122,7 +122,7 @@ protected:
 
 	climate::ClimateTraits supported_traits_;
 
-    InternalGPIOPin &rx_pin_;
+	InternalGPIOPin &rx_pin_;
 	sensor::Sensor *temperature_sensor_{nullptr};
 	int temperature_offset_ = 0;
 

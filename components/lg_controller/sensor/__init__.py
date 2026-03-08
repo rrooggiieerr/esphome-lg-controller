@@ -34,6 +34,9 @@ async def to_code(config):
     entity_id = config[ENTITY_ID]
     config["icon"] = LG_ENTITY_ICONS[entity_id]
 
+    if entity_id in [LG_ENTITY_PIPE_TEMPERATURE_IN, LG_ENTITY_PIPE_TEMPERATURE_MID, LG_ENTITY_PIPE_TEMPERATURE_OUT]:
+        config["unit_of_measurement"] = "°C"
+
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     await sensor.register_sensor(var, config)

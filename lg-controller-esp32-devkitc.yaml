@@ -139,31 +139,26 @@ number:
     name: "Fan Speed Slow"
     mode: box
     entity_category: config
-    internal: true
   - platform: lg_controller
     entity_id: fan_speed_low
     name: "Fan Speed Low"
     mode: box
     entity_category: config
-    internal: true
   - platform: lg_controller
     entity_id: fan_speed_medium
     name: "Fan Speed Medium"
     mode: box
     entity_category: config
-    internal: true
   - platform: lg_controller
     entity_id: fan_speed_high
     name: "Fan Speed High"
     id: fan_speed_high
     mode: box
     entity_category: config
-    internal: true
   - platform: lg_controller
     entity_id: sleep_timer
     name: "Sleep Timer"
     mode: box
-    internal: true
 
 # climate:
 #   - platform: lg_controller

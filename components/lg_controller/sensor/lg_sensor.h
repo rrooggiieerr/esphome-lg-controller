@@ -8,9 +8,6 @@ namespace lg_controller {
 
 class LGSensor : public LGEntity, public sensor::Sensor, public Component {
 public:
-	void setup() {
-//		this->set_internal(true);
-	}
 	void set_entity_id(std::string entity_id);
 };
 

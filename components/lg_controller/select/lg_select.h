@@ -8,9 +8,6 @@ namespace lg_controller {
 
 class LGSelect : public LGEntity, public select::Select, public Component {
 public:
-	void setup() {
-//		this->set_internal(true);
-	}
 	void set_entity_id(std::string entity_id);
 protected:
 	void control(const std::string &value) override;

@@ -8,9 +8,6 @@ namespace lg_controller {
 
 class LGNumber: public LGEntity, public number::Number, public Component {
 public:
-	void setup() {
-//		this->set_internal(true);
-	}
 	void set_entity_id(std::string entity_id);
 protected:
 	void control(float value) override;

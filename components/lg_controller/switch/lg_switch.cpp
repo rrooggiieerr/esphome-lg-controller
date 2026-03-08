@@ -30,15 +30,10 @@ void LGSwitch::dump_config() {
 void LGSwitch::set_entity_id(std::string entity_id) {
 	LGEntity::set_entity_id(entity_id);
 
-	if(entity_id == LG_ENTITY_AIR_PURIFIER) {
-		this->set_icon("mdi:pine-tree");
-	}
-	else if(entity_id == LG_ENTITY_INTERNAL_THERMISTOR) {
-		this->set_icon("mdi:thermometer");
+	if(entity_id == LG_ENTITY_INTERNAL_THERMISTOR) {
 		this->restore_and_set_mode(switch_::SWITCH_RESTORE_DEFAULT_OFF);
 	}
 	else if(entity_id == LG_ENTITY_AUTO_DRY) {
-		this->set_icon("mdi:fan-clock");
 //		this->restore_and_set_mode(switch_::SWITCH_RESTORE_DEFAULT_OFF);
 	}
 

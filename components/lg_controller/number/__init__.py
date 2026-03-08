@@ -15,6 +15,14 @@ LG_ENTITY_FAN_SPEED_MEDIUM = "fan_speed_medium"
 LG_ENTITY_FAN_SPEED_HIGH = "fan_speed_high"
 LG_ENTITY_SLEEP_TIMER = "sleep_timer"
 
+LG_ENTITY_ICONS = {
+    LG_ENTITY_FAN_SPEED_SLOW: "mdi:fan-chevron-down",
+    LG_ENTITY_FAN_SPEED_LOW: "mdi:fan-speed-1",
+    LG_ENTITY_FAN_SPEED_MEDIUM: "mdi:fan-speed-2",
+    LG_ENTITY_FAN_SPEED_HIGH: "mdi:fan-speed-3",
+    LG_ENTITY_SLEEP_TIMER: "mdi:timer-outline",
+}
+
 LGNumber = lg_controller_ns.class_("LGNumber", number.Number, cg.Component)
 
 CONFIG_SCHEMA = cv.All(number.number_schema(LGNumber).extend(LG_DEVICE_SCHEMA).extend(
@@ -25,6 +33,9 @@ CONFIG_SCHEMA = cv.All(number.number_schema(LGNumber).extend(LG_DEVICE_SCHEMA).e
 ).extend(cv.COMPONENT_SCHEMA))
 
 async def to_code(config):
+    entity_id = config[ENTITY_ID]
+    config["icon"] = LG_ENTITY_ICONS[entity_id]
+
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     max_value = 255

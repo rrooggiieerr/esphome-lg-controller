@@ -14,6 +14,13 @@ LG_ENTITY_PREHEAT = "preheat"
 LG_ENTITY_OUTDOOR = "outdoor"
 LG_ENTITY_AUTO_DRY_ACTIVE = "auto_dry_active"
 
+LG_ENTITY_ICONS = {
+    LG_ENTITY_DEFROST: "mdi:snowflake-melt",
+    LG_ENTITY_PREHEAT: "mdi:heat-wave",
+    LG_ENTITY_OUTDOOR: "mdi:fan",
+    LG_ENTITY_AUTO_DRY_ACTIVE: "mdi:fan-clock",
+}
+
 LGBinarySensor = lg_controller_ns.class_("LGBinarySensor", binary_sensor.BinarySensor, cg.Component)
 
 CONFIG_SCHEMA = cv.All(binary_sensor.binary_sensor_schema(LGBinarySensor).extend(LG_DEVICE_SCHEMA).extend(
@@ -24,6 +31,9 @@ CONFIG_SCHEMA = cv.All(binary_sensor.binary_sensor_schema(LGBinarySensor).extend
 ).extend(cv.COMPONENT_SCHEMA))
 
 async def to_code(config):
+    entity_id = config[ENTITY_ID]
+    config["icon"] = LG_ENTITY_ICONS[entity_id]
+
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     await binary_sensor.register_binary_sensor(var, config)

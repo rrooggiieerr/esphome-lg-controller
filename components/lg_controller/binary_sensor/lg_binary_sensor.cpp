@@ -9,16 +9,6 @@ static const char *const TAG = "lg_controller.binary_sensor";
 void LGBinarySensor::set_entity_id(std::string entity_id) {
 	LGEntity::set_entity_id(entity_id);
 
-	if(entity_id == LG_ENTITY_DEFROST) {
-		this->set_icon("mdi:snowflake-melt");
-	} else if(entity_id == LG_ENTITY_PREHEAT) {
-		this->set_icon("mdi:heat-wave");
-	} else if(entity_id == LG_ENTITY_OUTDOOR) {
-		this->set_icon("mdi:fan");
-	} else if(entity_id == LG_ENTITY_AUTO_DRY_ACTIVE) {
-		this->set_icon("mdi:fan-clock");
-	}
-
 	this->parent_->add_entity(entity_id, this);
 }
 

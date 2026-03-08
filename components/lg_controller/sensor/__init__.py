@@ -14,6 +14,13 @@ LG_ENTITY_PIPE_TEMPERATURE_IN = "pipe_temperature_in"
 LG_ENTITY_PIPE_TEMPERATURE_MID = "pipe_temperature_mid"
 LG_ENTITY_PIPE_TEMPERATURE_OUT = "pipe_temperature_out"
 
+LG_ENTITY_ICONS = {
+    LG_ENTITY_ERROR_CODE: "mdi:alert-circle-outline",
+    LG_ENTITY_PIPE_TEMPERATURE_IN: "mdi:thermometer",
+    LG_ENTITY_PIPE_TEMPERATURE_MID: "mdi:thermometer",
+    LG_ENTITY_PIPE_TEMPERATURE_OUT: "mdi:thermometer",    
+}
+
 LGSensor = lg_controller_ns.class_("LGSensor", sensor.Sensor, cg.Component)
 
 CONFIG_SCHEMA = cv.All(sensor.sensor_schema(LGSensor).extend(LG_DEVICE_SCHEMA).extend(
@@ -24,6 +31,9 @@ CONFIG_SCHEMA = cv.All(sensor.sensor_schema(LGSensor).extend(LG_DEVICE_SCHEMA).e
 ).extend(cv.COMPONENT_SCHEMA))
 
 async def to_code(config):
+    entity_id = config[ENTITY_ID]
+    config["icon"] = LG_ENTITY_ICONS[entity_id]
+
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     await sensor.register_sensor(var, config)

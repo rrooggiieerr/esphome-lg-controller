@@ -13,6 +13,12 @@ LG_ENTITY_AIR_PURIFIER = "air_purifier"
 LG_ENTITY_INTERNAL_THERMISTOR = "internal_thermistor"
 LG_ENTITY_AUTO_DRY = "auto_dry"
 
+LG_ENTITY_ICONS = {
+    LG_ENTITY_AIR_PURIFIER: "mdi:pine-tree",
+    LG_ENTITY_INTERNAL_THERMISTOR: "mdi:thermometer",
+    LG_ENTITY_AUTO_DRY: "mdi:fan-clock",
+}
+
 LGSwitch = lg_controller_ns.class_("LGSwitch", cg.Component, switch.Switch)
 
 CONFIG_SCHEMA = cv.All(switch.switch_schema(LGSwitch).extend(LG_DEVICE_SCHEMA).extend(
@@ -23,6 +29,9 @@ CONFIG_SCHEMA = cv.All(switch.switch_schema(LGSwitch).extend(LG_DEVICE_SCHEMA).e
 ).extend(cv.COMPONENT_SCHEMA))
 
 async def to_code(config):
+    entity_id = config[ENTITY_ID]
+    config["icon"] = LG_ENTITY_ICONS[entity_id]
+
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     await switch.register_switch(var, config)

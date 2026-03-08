@@ -9,16 +9,7 @@ static const char *const TAG = "lg_controller.number";
 void LGNumber::set_entity_id(std::string entity_id) {
 	LGEntity::set_entity_id(entity_id);
 
-	if(entity_id == LG_ENTITY_FAN_SPEED_SLOW) {
-		this->set_icon("mdi:fan-chevron-down");
-	} else if(entity_id == LG_ENTITY_FAN_SPEED_LOW) {
-		this->set_icon("mdi:fan-speed-1");
-	} else if(entity_id == LG_ENTITY_FAN_SPEED_MEDIUM) {
-		this->set_icon("mdi:fan-speed-2");
-	} else if(entity_id == LG_ENTITY_FAN_SPEED_HIGH) {
-		this->set_icon("mdi:fan-speed-3");
-	} else if(entity_id == LG_ENTITY_SLEEP_TIMER) {
-		this->set_icon("mdi:timer-outline");
+	if(entity_id == LG_ENTITY_SLEEP_TIMER) {
 		this->publish_state(0);
 	}
 

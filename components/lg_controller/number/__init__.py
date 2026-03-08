@@ -39,7 +39,7 @@ async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     max_value = 255
-    if config[ENTITY_ID] == "sleep_timer":
+    if config[ENTITY_ID] == LG_ENTITY_SLEEP_TIMER:
         max_value = 420
     await number.register_number(var, config, min_value=0, max_value=max_value, step=1)
     await lg_controller.register_lg_device(var, config)
